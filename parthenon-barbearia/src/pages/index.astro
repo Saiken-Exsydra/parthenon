@@ -7,11 +7,45 @@ const INSTAGRAM_URL = 'https://instagram.com/parthenonbarbearia';
 const OWNER         = 'Marco Antônio';
 
 const services = [
-  { icon: '✂', name: 'Cabelo',          desc: 'Corte clássico ou moderno, sempre com precisão.' },
-  { icon: '🪒', name: 'Barba',           desc: 'Modelagem e acabamento com toalha quente.' },
-  { icon: '〜', name: 'Bigode',          desc: 'Aparado e definido com navalha.' },
-  { icon: '◡', name: 'Sobrancelhas',    desc: 'Design natural com acabamento perfeito na navalha.' },
-  { icon: '⚗', name: 'Química Capilar', desc: 'Progressiva, relaxamento e tratamentos capilares.' },
+  {
+    icon: '✂', name: 'Cabelo', desc: 'Corte clássico ou moderno, sempre com precisão.',
+    prices: [
+      { style: 'Corte Simples',    price: 'R$ 35' },
+      { style: 'Corte Degradê',    price: 'R$ 45' },
+      { style: 'Navalhado',        price: 'R$ 55' },
+      { style: 'Corte + Barba',    price: 'R$ 60' },
+    ],
+  },
+  {
+    icon: '🪒', name: 'Barba', desc: 'Modelagem e acabamento com toalha quente.',
+    prices: [
+      { style: 'Apara Simples',              price: 'R$ 25' },
+      { style: 'Barba Completa',             price: 'R$ 35' },
+      { style: 'Barba Navalhada',            price: 'R$ 40' },
+    ],
+  },
+  {
+    icon: '〜', name: 'Bigode', desc: 'Aparado e definido com navalha.',
+    prices: [
+      { style: 'Aparar e Definir',   price: 'R$ 15' },
+      { style: 'Modelagem Completa', price: 'R$ 20' },
+    ],
+  },
+  {
+    icon: '◡', name: 'Sobrancelhas', desc: 'Design natural com acabamento perfeito na navalha.',
+    prices: [
+      { style: 'Design com Navalha', price: 'R$ 15' },
+      { style: 'Design + Henna',     price: 'R$ 25' },
+    ],
+  },
+  {
+    icon: '⚗', name: 'Química Capilar', desc: 'Progressiva, relaxamento e tratamentos capilares.',
+    prices: [
+      { style: 'Progressiva',        price: 'A consultar' },
+      { style: 'Relaxamento',        price: 'A consultar' },
+      { style: 'Tratamento Capilar', price: 'A consultar' },
+    ],
+  },
 ];
 
 const hours = [
@@ -331,6 +365,10 @@ const meanderPattern = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
       display: flex;
       flex-direction: column;
       align-items: flex-start;
+      cursor: pointer;
+      text-align: left;
+      width: 100%;
+      font-family: inherit;
     }
     .service-card:hover {
       border-color: var(--color-accent);
@@ -350,6 +388,101 @@ const meanderPattern = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
       font-size: .82rem;
       color: var(--color-text-muted);
       line-height: 1.6;
+    }
+    .card-hint {
+      margin-top: 1rem;
+      font-size: .75rem;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      color: var(--color-accent);
+      font-weight: 500;
+      opacity: .7;
+      transition: opacity .2s;
+    }
+    .service-card:hover .card-hint { opacity: 1; }
+
+    /* ─────────────────────────────
+       SERVICE MODAL
+    ───────────────────────────────── */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(13,27,42,.55);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: 1.5rem;
+      opacity: 0;
+      transition: opacity .22s;
+    }
+    .modal-overlay.open { opacity: 1; }
+    .modal-overlay[hidden] { display: none; }
+
+    .modal-box {
+      background: var(--color-surface);
+      border-radius: 12px;
+      padding: 2.5rem 2rem 2rem;
+      max-width: 420px;
+      width: 100%;
+      box-shadow: 0 24px 60px rgba(13,27,42,.22);
+      position: relative;
+      transform: translateY(18px);
+      transition: transform .22s;
+    }
+    .modal-overlay.open .modal-box { transform: translateY(0); }
+
+    .modal-close {
+      position: absolute;
+      top: 1rem;
+      right: 1.1rem;
+      background: none;
+      border: none;
+      font-size: 1.6rem;
+      line-height: 1;
+      color: var(--color-text-muted);
+      cursor: pointer;
+      padding: .1rem .4rem;
+      border-radius: 4px;
+      transition: color .15s, background .15s;
+    }
+    .modal-close:hover { color: var(--color-heading); background: var(--color-bg-alt); }
+
+    .modal-service-icon { font-size: 2.2rem; display: block; margin-bottom: .6rem; }
+
+    .modal-box h3 {
+      font-size: 1.5rem;
+      margin-bottom: 1.4rem;
+      color: var(--color-heading);
+    }
+
+    .modal-prices {
+      list-style: none;
+      margin-bottom: 1.8rem;
+    }
+    .modal-prices li {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      padding: .65rem 0;
+      border-bottom: 1px solid var(--color-border);
+      font-size: .92rem;
+    }
+    .modal-prices li:last-child { border-bottom: none; }
+    .modal-price-name { color: var(--color-text); }
+    .modal-price-value {
+      color: var(--color-heading);
+      font-weight: 500;
+      white-space: nowrap;
+      margin-left: 1rem;
+    }
+
+    .modal-cta {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: .5rem;
+      width: 100%;
     }
 
     /* ─────────────────────────────
@@ -407,23 +540,6 @@ const meanderPattern = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
     .hours-table td { padding: .85rem 0; font-size: .9rem; }
     .hours-table td:first-child { color: var(--color-text-muted); width: 140px; }
     .hours-table td:last-child  { color: var(--color-text); text-align: right; font-weight: 400; }
-
-    .hours-table tr.today td { color: var(--color-heading); font-weight: 500; }
-
-    /* More specific than .hours-table tr.today td to win the cascade */
-    .hours-table tr.today td .today-badge {
-      display: inline-block;
-      background: transparent;
-      color: var(--color-text-muted);
-      font-family: 'Playfair Display', serif;
-      font-style: italic;
-      font-size: .85rem;
-      font-weight: 400;
-      letter-spacing: .02em;
-      text-transform: none;
-      padding: 0;
-      vertical-align: baseline;
-    }
 
     .closed { color: var(--color-border) !important; font-style: italic; }
 
@@ -494,15 +610,6 @@ const meanderPattern = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
       border-color: var(--color-accent);
       color: var(--color-heading);
       transform: translateY(-2px);
-    }
-
-    .fast-reply {
-      margin-top: .5rem;
-      font-size: .82rem;
-      color: #25D366;
-      display: flex;
-      align-items: center;
-      gap: .3rem;
     }
 
     .map-wrapper {
@@ -629,12 +736,13 @@ const meanderPattern = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
         <div class="divider"></div>
       </div>
       <div class="services-grid">
-        {services.map(s => (
-          <div class="service-card fade-in">
+        {services.map((s, i) => (
+          <button class="service-card fade-in" data-service={i} aria-haspopup="dialog">
             <span class="service-icon" aria-hidden="true">{s.icon}</span>
             <h3>{s.name}</h3>
             <p>{s.desc}</p>
-          </div>
+            <span class="card-hint">Ver preços</span>
+          </button>
         ))}
       </div>
     </div>
@@ -726,7 +834,6 @@ const meanderPattern = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
               @parthenonbarbearia
             </a>
           </div>
-          <p class="fast-reply">✓ Responde rápido</p>
         </div>
 
         <div class="fade-in">
@@ -747,6 +854,22 @@ const meanderPattern = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
       </div>
     </div>
   </section>
+
+  <!-- SERVICE MODAL -->
+  <div id="service-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-title" hidden>
+    <div class="modal-box">
+      <button class="modal-close" id="modal-close" aria-label="Fechar">&times;</button>
+      <span class="modal-service-icon" id="modal-icon" aria-hidden="true"></span>
+      <h3 id="modal-title"></h3>
+      <ul class="modal-prices" id="modal-prices"></ul>
+      <a id="modal-cta" href={WHATSAPP_URL} target="_blank" rel="noopener" class="whatsapp-btn modal-cta">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/>
+        </svg>
+        Agendar pelo WhatsApp
+      </a>
+    </div>
+  </div>
 
   <!-- FOOTER -->
   <footer>
@@ -782,7 +905,7 @@ const meanderPattern = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
     <p class="footer-copy">&copy; 2025 Barbearia Parthenon — Uberlândia, MG</p>
   </footer>
 
-  <script>
+  <script define:vars={{ services }}>
     // ── Intersection Observer: fade-in on scroll ──
     const observer = new IntersectionObserver(
       (entries) => entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); }),
@@ -790,20 +913,46 @@ const meanderPattern = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
     );
     document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
 
-    // ── Highlight today in hours table ──
-    const today = new Date().getDay(); // 0=Sun … 6=Sat
-    const rows = document.querySelectorAll<HTMLTableRowElement>('#hours-table tr[data-day]');
-    rows.forEach(row => {
-      if (Number(row.dataset.day) === today) {
-        row.classList.add('today');
-        const td = row.querySelector('td');
-        if (td) {
-          const badge = document.createElement('span');
-          badge.className = 'today-badge';
-          badge.textContent = 'Hoje';
-          td.prepend(badge, '\u00A0');
-        }
-      }
+    // ── Service modal ──
+    const modal    = document.getElementById('service-modal');
+    const modalIcon  = document.getElementById('modal-icon');
+    const modalTitle = document.getElementById('modal-title');
+    const modalPrices = document.getElementById('modal-prices');
+    const closeBtn  = document.getElementById('modal-close');
+
+    function openModal(index) {
+      const svc = services[index];
+      if (!svc || !modal) return;
+      modalIcon.textContent  = svc.icon;
+      modalTitle.textContent = svc.name;
+      modalPrices.innerHTML  = svc.prices
+        .map(p => `<li><span class="modal-price-name">${p.style}</span><span class="modal-price-value">${p.price}</span></li>`)
+        .join('');
+      modal.hidden = false;
+      requestAnimationFrame(() => modal.classList.add('open'));
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeModal() {
+      modal.classList.remove('open');
+      modal.addEventListener('transitionend', () => {
+        modal.hidden = true;
+        document.body.style.overflow = '';
+      }, { once: true });
+    }
+
+    document.querySelectorAll('.service-card').forEach(card => {
+      card.addEventListener('click', () => openModal(Number(card.dataset.service)));
+    });
+
+    closeBtn.addEventListener('click', closeModal);
+
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) closeModal();
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && !modal.hidden) closeModal();
     });
   </script>
 </body>
