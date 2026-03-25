@@ -460,7 +460,9 @@ const meanderPattern = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
       list-style: none;
       margin-bottom: 1.8rem;
     }
-    .modal-prices li {
+    /* :global() — these <li> and <span>s are injected by JS and won't carry
+       Astro's scope hash, so they must be opted out of scoping */
+    :global(.modal-prices li) {
       display: flex;
       justify-content: space-between;
       align-items: baseline;
@@ -468,9 +470,9 @@ const meanderPattern = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
       border-bottom: 1px solid var(--color-border);
       font-size: .92rem;
     }
-    .modal-prices li:last-child { border-bottom: none; }
-    .modal-price-name { color: var(--color-text); }
-    .modal-price-value {
+    :global(.modal-prices li:last-child) { border-bottom: none; }
+    :global(.modal-price-name) { color: var(--color-text); }
+    :global(.modal-price-value) {
       color: var(--color-heading);
       font-weight: 500;
       white-space: nowrap;
