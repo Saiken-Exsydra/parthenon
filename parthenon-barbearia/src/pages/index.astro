@@ -65,7 +65,14 @@ const hours = [
   { day: 'Sábado', value: '10h às 17h' },
 ];
 
-const gallery = ['Cortes', 'Barba', 'Acabamento', 'Ambiente', 'Detalhes', 'Retratos'];
+const gallery = [
+  '/uploads/2020-08-04.jpg',
+  '/uploads/2020-08-04s.jpg',
+  '/uploads/2020-08-0d4.jpg',
+  '/uploads/2020-08dd-04.jpg',
+  '/uploads/B271D041-2BA0-473C-9174-6C53C7003BF3.jpeg',
+  '/uploads/B9B906E5-0986-4986-AFED-77EC5CA97CE6.jpeg',
+];
 ---
 
 <!doctype html>
@@ -95,6 +102,7 @@ const gallery = ['Cortes', 'Barba', 'Acabamento', 'Ambiente', 'Detalhes', 'Retra
       --radius: 12px;
       --section-space: 4.5rem;
       --hero-card-shadow-alpha: 0.52;
+      --hero-bg-y-offset: 56px;
       --font-display: "Playfair Display", Georgia, serif;
       --font-body: "DM Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
     }
@@ -127,8 +135,8 @@ const gallery = ['Cortes', 'Barba', 'Acabamento', 'Ambiente', 'Detalhes', 'Retra
       justify-content: space-between;
       gap: 1rem;
       padding: 0.8rem 1rem;
-      background: rgba(0, 0, 0, 0.92);
-      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(255, 255, 255, 0.94);
+      border-bottom: 1px solid rgba(13, 27, 42, 0.08);
       backdrop-filter: blur(10px);
     }
 
@@ -141,7 +149,7 @@ const gallery = ['Cortes', 'Barba', 'Acabamento', 'Ambiente', 'Detalhes', 'Retra
 
     .brand img {
       width: 52px;
-      mix-blend-mode: screen;
+      mix-blend-mode: normal;
     }
 
     .brand-copy {
@@ -153,7 +161,7 @@ const gallery = ['Cortes', 'Barba', 'Acabamento', 'Ambiente', 'Detalhes', 'Retra
       font-size: 0.68rem;
       letter-spacing: 0.28em;
       text-transform: uppercase;
-      color: rgba(255, 255, 255, 0.56);
+      color: rgba(13, 27, 42, 0.52);
     }
 
     .brand-copy strong {
@@ -161,15 +169,17 @@ const gallery = ['Cortes', 'Barba', 'Acabamento', 'Ambiente', 'Detalhes', 'Retra
       font-size: 1.15rem;
       letter-spacing: 0.06em;
       font-weight: 900;
+      color: #0d1b2a;
     }
 
     .nav-link {
       padding: 0.8rem 1rem;
-      border: 1px solid rgba(255, 255, 255, 0.34);
+      border: 1px solid rgba(13, 27, 42, 0.16);
       border-radius: var(--radius);
       font-size: 0.75rem;
       letter-spacing: 0.18em;
       text-transform: uppercase;
+      color: #0d1b2a;
     }
 
     .hero {
@@ -181,7 +191,7 @@ const gallery = ['Cortes', 'Barba', 'Acabamento', 'Ambiente', 'Detalhes', 'Retra
       background-color: #000;
       background-image: url("/uploads/wood.png");
       background-repeat: repeat;
-      background-position: top left;
+      background-position: left var(--hero-bg-y-offset);
       background-size: 720px auto;
       overflow: clip;
     }
@@ -190,7 +200,7 @@ const gallery = ['Cortes', 'Barba', 'Acabamento', 'Ambiente', 'Detalhes', 'Retra
       content: "";
       position: absolute;
       inset: 0;
-      background: rgba(0, 0, 0, 0.3);
+      background: rgba(0, 0, 0, 0.2);
     }
 
     .hero-card {
@@ -219,6 +229,7 @@ const gallery = ['Cortes', 'Barba', 'Acabamento', 'Ambiente', 'Detalhes', 'Retra
       width: min(72vw, 220px);
       margin: 0 auto 1.75rem;
       mix-blend-mode: screen;
+      filter: saturate(1.35) contrast(1.18) brightness(1.14);
     }
 
     .hero-quote {
@@ -410,25 +421,99 @@ const gallery = ['Cortes', 'Barba', 'Acabamento', 'Ambiente', 'Detalhes', 'Retra
       border: 1px solid #d0dce8;
       border-radius: 10px;
       overflow: hidden;
-      background:
-        linear-gradient(180deg, rgba(13, 27, 42, 0.04), rgba(13, 27, 42, 0.08)),
-        url("/BG1.png");
-      background-size: 230px;
-      display: grid;
-      place-items: end start;
-      padding: 0.85rem;
+      background: #e8edf2;
     }
 
-    .gallery-label {
-      display: inline-flex;
-      padding: 0.36rem 0.52rem;
-      background: rgba(255, 255, 255, 0.88);
-      border: 1px solid rgba(13, 27, 42, 0.08);
+    .gallery-trigger {
+      display: block;
+      width: 100%;
+      height: 100%;
+      padding: 0;
+      border: 0;
+      background: transparent;
+      cursor: pointer;
+    }
+
+    .gallery-cell img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 180ms ease;
+    }
+
+    .gallery-trigger:hover img,
+    .gallery-trigger:focus-visible img {
+      transform: scale(1.03);
+    }
+
+    .gallery-trigger:focus-visible {
+      outline: 3px solid rgba(26, 58, 92, 0.35);
+      outline-offset: -3px;
+    }
+
+    .lightbox {
+      position: fixed;
+      inset: 0;
+      z-index: 80;
+      display: grid;
+      place-items: center;
+      padding: 1rem;
+      background: rgba(0, 0, 0, 0.82);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 180ms ease;
+    }
+
+    .lightbox.is-open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .lightbox-dialog {
+      position: relative;
+      width: min(100%, 64rem);
+      max-height: min(100dvh - 2rem, 56rem);
+      display: grid;
+      gap: 0.75rem;
+    }
+
+    .lightbox-close {
+      position: absolute;
+      top: 0.4rem;
+      right: 0.4rem;
+      z-index: 1;
+      width: 2.75rem;
+      height: 2.75rem;
+      border: 0;
       border-radius: 999px;
-      color: #0d1b2a;
-      font-size: 0.68rem;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
+      background: rgba(0, 0, 0, 0.62);
+      color: #fff;
+      font-size: 1.6rem;
+      line-height: 1;
+      cursor: pointer;
+    }
+
+    .lightbox-frame {
+      overflow: hidden;
+      border-radius: 14px;
+      background: #0a0f17;
+      box-shadow: 0 18px 70px rgba(0, 0, 0, 0.35);
+    }
+
+    .lightbox-frame img {
+      display: block;
+      width: 100%;
+      max-height: min(100dvh - 2rem, 56rem);
+      object-fit: contain;
+      background: #0a0f17;
+    }
+
+    .lightbox-caption {
+      margin: 0;
+      text-align: center;
+      color: rgba(255, 255, 255, 0.78);
+      font-size: 0.82rem;
+      letter-spacing: 0.08em;
     }
 
     .hours-table {
@@ -571,6 +656,21 @@ const gallery = ['Cortes', 'Barba', 'Acabamento', 'Ambiente', 'Detalhes', 'Retra
     @media (min-width: 980px) {
       .services-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
     }
+
+    @media (max-width: 699px) {
+      .lightbox {
+        padding: 0.75rem;
+      }
+
+      .lightbox-dialog {
+        width: 100%;
+        max-height: calc(100dvh - 1.5rem);
+      }
+
+      .lightbox-frame img {
+        max-height: calc(100dvh - 1.5rem);
+      }
+    }
   </style>
 </head>
 <body>
@@ -640,8 +740,17 @@ const gallery = ['Cortes', 'Barba', 'Acabamento', 'Ambiente', 'Detalhes', 'Retra
           <div class="rule"></div>
         </div>
         <div class="gallery-grid">
-          {gallery.map(label => (
-            <div class="gallery-cell"><span class="gallery-label">{label}</span></div>
+          {gallery.map((src, index) => (
+            <div class="gallery-cell">
+              <button
+                class="gallery-trigger"
+                type="button"
+                data-gallery-trigger
+                data-gallery-src={src}
+                data-gallery-alt={`Trabalho ${index + 1} da Parthenon Barbearia`}>
+                <img src={src} alt={`Trabalho ${index + 1} da Parthenon Barbearia`} loading="lazy" />
+              </button>
+            </div>
           ))}
         </div>
       </div>
@@ -711,5 +820,58 @@ const gallery = ['Cortes', 'Barba', 'Acabamento', 'Ambiente', 'Detalhes', 'Retra
       <p>&copy; 2025 Barbearia Parthenon — Uberlândia, MG</p>
     </footer>
   </div>
+
+  <div class="lightbox" id="gallery-lightbox" aria-hidden="true">
+    <div class="lightbox-dialog" role="dialog" aria-modal="true" aria-label="Imagem ampliada">
+      <button class="lightbox-close" type="button" aria-label="Fechar imagem" data-lightbox-close>&times;</button>
+      <div class="lightbox-frame">
+        <img id="lightbox-image" src="" alt="" />
+      </div>
+      <p class="lightbox-caption" id="lightbox-caption"></p>
+    </div>
+  </div>
+
+  <script>
+    const lightbox = document.getElementById('gallery-lightbox');
+    const lightboxImage = document.getElementById('lightbox-image');
+    const lightboxCaption = document.getElementById('lightbox-caption');
+    const triggers = document.querySelectorAll('[data-gallery-trigger]');
+    const closeButton = document.querySelector('[data-lightbox-close]');
+
+    const openLightbox = (src, alt) => {
+      lightboxImage.src = src;
+      lightboxImage.alt = alt;
+      lightboxCaption.textContent = alt;
+      lightbox.classList.add('is-open');
+      lightbox.setAttribute('aria-hidden', 'false');
+      document.body.style.overflow = 'hidden';
+    };
+
+    const closeLightbox = () => {
+      lightbox.classList.remove('is-open');
+      lightbox.setAttribute('aria-hidden', 'true');
+      lightboxImage.src = '';
+      lightboxImage.alt = '';
+      lightboxCaption.textContent = '';
+      document.body.style.overflow = '';
+    };
+
+    triggers.forEach((trigger) => {
+      trigger.addEventListener('click', () => {
+        openLightbox(trigger.dataset.gallerySrc, trigger.dataset.galleryAlt);
+      });
+    });
+
+    closeButton?.addEventListener('click', closeLightbox);
+
+    lightbox?.addEventListener('click', (event) => {
+      if (event.target === lightbox) closeLightbox();
+    });
+
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && lightbox?.classList.contains('is-open')) closeLightbox();
+    });
+  </script>
+
 </body>
 </html>
