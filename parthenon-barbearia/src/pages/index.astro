@@ -2,70 +2,67 @@
 // PARTHENON BARBEARIA — Single-page site
 const WHATSAPP_URL  = 'https://wa.me/5534999992321';
 const WHATSAPP_TEL  = '(34) 9 9999-2321';
-const EMAIL         = 'parthenonbarbershop@hotmail.com';
+const EMAIL         = 'marco_ams@hotmail.com';
 const INSTAGRAM_URL = 'https://instagram.com/parthenonbarbearia';
 const OWNER         = 'Marco Antônio';
+const HERO_PANEL_ENABLED = false;
 
 const services = [
   {
-    name: 'Cabelo',
-    range: 'R$ 35–60',
-    desc: 'Corte clássico ou moderno, sempre com precisão.',
+    name: 'Sobrancelha',
+    range: 'R$ 20',
+    desc: 'Design de sobrancelha. Não fazemos rena.',
     prices: [
-      { style: 'Corte simples',  price: 'R$ 35' },
-      { style: 'Corte degradê',  price: 'R$ 45' },
-      { style: 'Navalhado',      price: 'R$ 55' },
-      { style: 'Corte + barba',  price: 'R$ 60' },
+      { style: 'Sobrancelha', price: 'R$ 20' },
+    ],
+  },
+  {
+    name: 'Pezinho',
+    range: 'R$ 20',
+    desc: 'Acabamento rápido para manter visual alinhado.',
+    prices: [
+      { style: 'Pezinho', price: 'R$ 20' },
     ],
   },
   {
     name: 'Barba',
-    range: 'R$ 25–40',
-    desc: 'Modelagem e acabamento com toalha quente.',
+    range: 'R$ 30–50',
+    desc: 'Barba simples ou com pigmentação.',
     prices: [
-      { style: 'Apara simples',   price: 'R$ 25' },
-      { style: 'Barba completa',  price: 'R$ 35' },
-      { style: 'Barba navalhada', price: 'R$ 40' },
+      { style: 'Barba simples', price: 'R$ 30' },
+      { style: 'Barba + pigmentação', price: 'R$ 50' },
     ],
   },
   {
-    name: 'Bigode',
-    range: 'R$ 15–20',
-    desc: 'Aparado e definido com navalha para acabamento limpo.',
+    name: 'Cortes',
+    range: 'R$ 30–50',
+    desc: 'Cortes simples, degradê e navalhado.',
     prices: [
-      { style: 'Aparar e definir',     price: 'R$ 15' },
-      { style: 'Modelagem completa',   price: 'R$ 20' },
+      { style: 'Corte simples', price: 'R$ 30' },
+      { style: 'Corte degradê simples', price: 'R$ 40' },
+      { style: 'Corte degradê navalhado', price: 'R$ 50' },
     ],
   },
   {
-    name: 'Sobrancelhas',
-    range: 'R$ 15–25',
-    desc: 'Design natural com acabamento preciso na navalha.',
+    name: 'Tratamentos capilares',
+    range: 'A partir de R$ 70',
+    desc: 'Química capilar e tratamentos sob avaliação.',
     prices: [
-      { style: 'Design com navalha', price: 'R$ 15' },
-      { style: 'Design + henna',     price: 'R$ 25' },
-    ],
-  },
-  {
-    name: 'Química capilar',
-    range: 'A consultar',
-    desc: 'Progressiva, relaxamento e tratamentos sob avaliação.',
-    prices: [
-      { style: 'Progressiva',         price: 'A consultar' },
-      { style: 'Relaxamento',         price: 'A consultar' },
-      { style: 'Tratamento capilar',  price: 'A consultar' },
+      { style: 'Selagem', price: 'A partir de R$ 70' },
+      { style: 'Botox capilar', price: 'A partir de R$ 70' },
+      { style: 'Descoloração capilar', price: 'R$ 120' },
+      { style: 'Luzes capilar', price: 'R$ 120' },
     ],
   },
 ];
 
 const hours = [
-  { day: 'Segunda', value: '10:00 – 19:00' },
-  { day: 'Terça',   value: '10:00 – 18:00' },
-  { day: 'Quarta',  value: '10:00 – 20:00' },
-  { day: 'Quinta',  value: '10:00 – 20:00' },
-  { day: 'Sexta',   value: '12:00 – 18:00' },
-  { day: 'Sábado',  value: '10:00 – 15:30' },
-  { day: 'Domingo', value: 'Fechado' },
+  { day: 'Segunda-feira', value: '10h às 19h' },
+  { day: 'Terça-feira', value: '10h às 20h' },
+  { day: 'Quarta-feira', value: '10h às 20h' },
+  { day: 'Quinta-feira', value: '10h às 18h' },
+  { day: 'Sexta-feira', value: '12h às 18h' },
+  { day: 'Sábado', value: '10h às 17h' },
 ];
 
 const gallery = ['Cortes', 'Barba', 'Acabamento', 'Ambiente', 'Detalhes', 'Retratos'];
@@ -77,7 +74,7 @@ const gallery = ['Cortes', 'Barba', 'Acabamento', 'Ambiente', 'Detalhes', 'Retra
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="generator" content={Astro.generator} />
-  <meta name="description" content="Parthenon Barbearia — Cabelo, barba, bigode, sobrancelhas e química capilar em Uberlândia, MG. Agende com Marco Antônio pelo WhatsApp." />
+  <meta name="description" content="Parthenon Barbearia — cortes, barba, sobrancelha, pezinho e tratamentos capilares em Uberlândia, MG. Agende com Marco Antônio pelo WhatsApp." />
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   <title>Parthenon Barbearia — Uberlândia, MG</title>
 
@@ -97,9 +94,6 @@ const gallery = ['Cortes', 'Barba', 'Acabamento', 'Ambiente', 'Detalhes', 'Retra
       --navy: #182866;
       --radius: 12px;
       --section-space: 4.5rem;
-      --hero-pattern-size: 320px;
-      --hero-overlay-start: 0.22;
-      --hero-overlay-end: 0.68;
       --hero-card-shadow-alpha: 0.52;
       --font-display: "Playfair Display", Georgia, serif;
       --font-body: "DM Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
@@ -185,9 +179,10 @@ const gallery = ['Cortes', 'Barba', 'Acabamento', 'Ambiente', 'Detalhes', 'Retra
       place-items: center;
       padding: 5.5rem 1rem 2rem;
       background-color: #000;
-      background-image: url("/BG1.png");
+      background-image: url("/uploads/wood.png");
       background-repeat: repeat;
-      background-size: var(--hero-pattern-size);
+      background-position: top left;
+      background-size: 720px auto;
       overflow: clip;
     }
 
@@ -195,9 +190,7 @@ const gallery = ['Cortes', 'Barba', 'Acabamento', 'Ambiente', 'Detalhes', 'Retra
       content: "";
       position: absolute;
       inset: 0;
-      background:
-        radial-gradient(circle at 50% 38%, rgba(0, 0, 0, var(--hero-overlay-start)), rgba(0, 0, 0, 0.8) 72%),
-        linear-gradient(180deg, rgba(0, 0, 0, 0.26), rgba(0, 0, 0, var(--hero-overlay-end)));
+      background: rgba(0, 0, 0, 0.3);
     }
 
     .hero-card {
@@ -206,10 +199,20 @@ const gallery = ['Cortes', 'Barba', 'Acabamento', 'Ambiente', 'Detalhes', 'Retra
       width: min(100%, 33rem);
       text-align: center;
       padding: 2rem 1.25rem 2.2rem;
+    }
+
+    .hero-card--panel {
       background: rgba(0, 0, 0, 0.62);
       border: 1px solid rgba(255, 255, 255, 0.08);
       border-radius: 4px;
       box-shadow: 0 0 90px 48px rgba(0, 0, 0, var(--hero-card-shadow-alpha));
+    }
+
+    .hero-card--plain {
+      background: transparent;
+      border: 0;
+      border-radius: 0;
+      box-shadow: none;
     }
 
     .hero-logo {
@@ -584,7 +587,7 @@ const gallery = ['Cortes', 'Barba', 'Acabamento', 'Ambiente', 'Detalhes', 'Retra
     </nav>
 
     <section class="hero" id="inicio">
-      <div class="hero-card">
+      <div class={`hero-card ${HERO_PANEL_ENABLED ? 'hero-card--panel' : 'hero-card--plain'}`}>
         <img class="hero-logo" src="/logo.png" alt="Parthenon Barbearia" />
         <p class="hero-quote">“Cuidar da aparência não é vaidade — é o respeito silencioso que um homem tem por si mesmo.”</p>
         <p class="hero-byline">{OWNER} · Parthenon Barbearia</p>
