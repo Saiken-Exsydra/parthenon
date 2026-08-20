@@ -417,7 +417,8 @@ const gallery = [
     .booking-note { color: rgba(255, 255, 255, 0.7); }
     .booking-error { color: #ffb6c6; }
     .booking-loading { margin: 1.25rem 0 0; color: rgba(255, 255, 255, 0.72); font-size: 0.9rem; }
-    .cal-scheduler { min-height: 390px; margin-top: 1rem; overflow: hidden; border-radius: 8px; background: #fff; }
+    .cal-scheduler { min-height: 420px; margin-top: 1rem; overflow: hidden; border-radius: 8px; }
+    .cal-scheduler__inline { width: 100%; min-height: 420px; }
     .booking-success { text-align: center; }
     .booking-success-logo { width: min(42vw, 112px); margin: 0 auto 1.1rem; }
     .booking-success-mark { display: grid; width: 2.4rem; height: 2.4rem; margin: 0 auto 1rem; place-items: center; border-radius: 50%; background: #25d366; color: #fff; font-size: 1.35rem; font-weight: 700; line-height: 1; }
@@ -957,8 +958,12 @@ const gallery = [
     const bookingCalError = document.getElementById('booking-cal-error');
     const bookingCalendarLoading = document.getElementById('booking-calendar-loading');
     const calendarHost = document.getElementById('cal-scheduler');
+    const CAL_NAMESPACE = 'corte-simples';
+    const CAL_INLINE_ID = 'my-cal-inline-corte-simples';
     let selectedBookingService = null;
     let calEmbedInitialized = false;
+    let calEmbedLoadPromise = null;
+    let calEmbedMounting = false;
 
     const setBookingView = (view) => {
       [bookingSelection, bookingDetails, bookingUnavailable, bookingCalendar, bookingSuccess].forEach((element) => {
@@ -1055,6 +1060,7 @@ const gallery = [
     const showInitialBookingSelection = (clearClientDetails = false) => {
       selectedBookingService = null;
       calendarHost.replaceChildren();
+      calEmbedMounting = false;
       bookingCalendarLoading.hidden = true;
       if (clearClientDetails) {
         bookingName.value = '';
@@ -1066,8 +1072,31 @@ const gallery = [
     };
 
     const loadCalEmbed = () => {
-      if (window.Cal) return Promise.resolve(window.Cal);
-      return new Promise((resolve, reject) => {
+      if (calEmbedLoadPromise) return calEmbedLoadPromise;
+      if (window.Cal?.loaded) return Promise.resolve(window.Cal);
+      calEmbedLoadPromise = new Promise((resolve, reject) => {
+        const queuedCal = window.Cal || function () {
+          const cal = window.Cal;
+          const args = arguments;
+          if (args[0] === 'init') {
+            const namespace = args[1];
+            const api = function () { api.q.push(arguments); };
+            api.q = api.q || [];
+            if (typeof namespace === 'string') {
+              cal.ns[namespace] = cal.ns[namespace] || api;
+              cal.ns[namespace].q.push(args);
+              cal.q.push(['initNamespace', namespace]);
+            } else {
+              cal.q.push(args);
+            }
+            return;
+          }
+          cal.q.push(args);
+        };
+        queuedCal.ns = queuedCal.ns || {};
+        queuedCal.q = queuedCal.q || [];
+        queuedCal.loaded = true;
+        window.Cal = queuedCal;
         const script = document.createElement('script');
         script.src = 'https://app.cal.com/embed/embed.js';
         script.async = true;
@@ -1075,6 +1104,8 @@ const gallery = [
         script.onerror = () => reject(new Error('Não foi possível carregar o calendário.'));
         document.head.append(script);
       });
+      calEmbedLoadPromise.catch(() => { calEmbedLoadPromise = null; });
+      return calEmbedLoadPromise;
     };
 
     const showBookingSuccess = (booking) => {
@@ -1131,6 +1162,7 @@ const gallery = [
       const name = bookingName.value.trim();
       const phone = normalizedBrazilPhone(bookingPhone.value);
       if (!selectedBookingService || !selectedBookingService.calLink) return;
+      if (calEmbedMounting) return;
       if (name.length < 2) {
         bookingFormError.textContent = 'Informe seu nome para continuar.';
         bookingFormError.hidden = false;
@@ -1145,14 +1177,23 @@ const gallery = [
       }
       setBookingView(bookingCalendar);
       bookingCalendarLoading.hidden = false;
+      calEmbedMounting = true;
       scrollToBooking();
       try {
         const Cal = await loadCalEmbed();
         if (!calEmbedInitialized) {
-          Cal('init', { origin: 'https://cal.com' });
-          Cal('on', { action: 'bookingSuccessfulV2', callback: (event) => showBookingSuccess(event.detail?.data || {}) });
-          Cal('on', { action: 'linkReady', callback: () => { bookingCalendarLoading.hidden = true; } });
-          Cal('on', { action: 'linkFailed', callback: (event) => {
+          Cal('init', CAL_NAMESPACE, { origin: 'https://app.cal.com' });
+          Cal.config = Cal.config || {};
+          Cal.config.forwardQueryParams = true;
+          const CalCorteSimples = Cal.ns?.[CAL_NAMESPACE];
+          if (!CalCorteSimples) throw new Error('O calendário não foi inicializado corretamente.');
+          CalCorteSimples('on', { action: 'bookingSuccessfulV2', callback: (event) => showBookingSuccess(event.detail?.data || {}) });
+          CalCorteSimples('on', { action: 'linkReady', callback: () => {
+            calEmbedMounting = false;
+            bookingCalendarLoading.hidden = true;
+          }});
+          CalCorteSimples('on', { action: 'linkFailed', callback: (event) => {
+            calEmbedMounting = false;
             console.warn('Falha ao carregar o embed do Cal.com.', event.detail?.data);
             bookingCalendarLoading.hidden = true;
             bookingCalError.textContent = 'Não foi possível abrir o calendário agora. Tente novamente ou fale com Marco pelo WhatsApp.';
@@ -1161,12 +1202,26 @@ const gallery = [
           calEmbedInitialized = true;
         }
         calendarHost.replaceChildren();
-        Cal('inline', {
-          elementOrSelector: calendarHost,
+        const inlineContainer = document.createElement('div');
+        inlineContainer.id = CAL_INLINE_ID;
+        inlineContainer.className = 'cal-scheduler__inline';
+        calendarHost.append(inlineContainer);
+        const CalCorteSimples = Cal.ns?.[CAL_NAMESPACE];
+        if (!CalCorteSimples) throw new Error('O calendário não foi inicializado corretamente.');
+        CalCorteSimples('inline', {
+          elementOrSelector: `#${CAL_INLINE_ID}`,
           calLink: calLinkValue(selectedBookingService.calLink),
-          config: { name, attendeePhoneNumber: phone },
+          config: {
+            layout: 'month_view',
+            useSlotsViewOnSmallScreen: 'true',
+            theme: 'auto',
+            name,
+            attendeePhoneNumber: phone,
+          },
         });
+        CalCorteSimples('ui', { hideEventTypeDetails: false, layout: 'month_view' });
       } catch (error) {
+        calEmbedMounting = false;
         bookingCalendarLoading.hidden = true;
         bookingCalError.textContent = 'Não foi possível abrir o calendário agora. Tente novamente ou fale com Marco pelo WhatsApp.';
         bookingCalError.hidden = false;
