@@ -128,14 +128,29 @@ const gallery = [
     }
 
     .nav-link {
-      padding: 0.8rem 1rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 44px;
+      padding: 0.55rem 0.72rem;
       border: 1px solid rgba(13, 27, 42, 0.16);
       border-radius: var(--radius);
-      font-size: 0.75rem;
-      letter-spacing: 0.18em;
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      line-height: 1;
       text-transform: uppercase;
+      white-space: nowrap;
       color: #0d1b2a;
+      transition: background 160ms ease, border-color 160ms ease;
     }
+
+    .nav-link:hover { border-color: #1a3a5c; background: rgba(26, 58, 92, 0.06); }
+    .nav-link__mobile { display: inline; }
+    .nav-link__desktop { display: none; }
+
+    :global(body.is-booking) .nav { display: none; }
+    :global(body.is-booking) .section-booking { min-height: 100dvh; }
 
     .hero {
       position: relative;
@@ -674,7 +689,7 @@ const gallery = [
 
     @media (min-width: 700px) {
       .nav { padding-inline: 2rem; }
-      .nav-link { padding-inline: 1.2rem; }
+      .nav-link { padding-inline: 1rem; }
       .hero { background-size: auto; }
       .hero-card { padding: 2.5rem 2rem 2.7rem; }
       .services-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -683,6 +698,11 @@ const gallery = [
       .contact-actions { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .booking-panel { padding: 1.75rem; }
       :global(.booking-service-options) { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+
+    @media (min-width: 420px) {
+      .nav-link__mobile { display: none; }
+      .nav-link__desktop { display: inline; }
     }
 
     @media (min-width: 980px) {
@@ -718,7 +738,7 @@ const gallery = [
           <strong>Parthenon</strong>
         </span>
       </a>
-      <a class="nav-link" href="#agendar">Agendar horário</a>
+      <a class="nav-link" href="#agendar"><span class="nav-link__mobile">Agendar</span><span class="nav-link__desktop">Agendar horário</span></a>
     </nav>
 
     <section class="hero" id="inicio">
@@ -982,8 +1002,17 @@ const gallery = [
       });
     };
 
+    const enterBookingMode = () => {
+      document.body.classList.add('is-booking');
+    };
+
+    const exitBookingMode = () => {
+      document.body.classList.remove('is-booking');
+    };
+
     const scrollToBooking = () => {
-      bookingPanel?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      if (!bookingPanel) return;
+      window.scrollTo({ top: bookingPanel.getBoundingClientRect().top + window.scrollY, behavior: 'auto' });
     };
 
     const clearBookingErrors = () => {
@@ -1025,6 +1054,7 @@ const gallery = [
     const selectBookingService = (serviceId) => {
       const service = bookingServicesById.get(serviceId);
       if (!service) return;
+      enterBookingMode();
       selectedBookingService = service;
       clearBookingErrors();
       bookingCalendarLoading.hidden = true;
@@ -1042,6 +1072,7 @@ const gallery = [
     };
 
     const showServiceChoices = (serviceIds) => {
+      enterBookingMode();
       bookingSelection.replaceChildren();
       const step = document.createElement('p');
       step.className = 'booking-step';
@@ -1174,13 +1205,30 @@ const gallery = [
       button.addEventListener('click', () => showServiceChoices(button.dataset.bookingGroup.split(',')));
     });
 
+    document.querySelectorAll('a[href="#agendar"]').forEach((link) => {
+      link.addEventListener('click', (event) => {
+        event.preventDefault();
+        enterBookingMode();
+        window.history.replaceState(null, '', '#agendar');
+        scrollToBooking();
+      });
+    });
+
     document.querySelectorAll('[data-booking-change]').forEach((button) => {
       button.addEventListener('click', () => showInitialBookingSelection(true));
     });
 
     document.getElementById('booking-back-home')?.addEventListener('click', () => {
+      exitBookingMode();
       showInitialBookingSelection(true);
     });
+
+    window.addEventListener('hashchange', () => {
+      if (!window.location.hash || window.location.hash === '#inicio') exitBookingMode();
+      if (window.location.hash === '#agendar') enterBookingMode();
+    });
+
+    if (window.location.hash === '#agendar') enterBookingMode();
 
     bookingPhone.addEventListener('input', () => {
       bookingPhone.value = formatBrazilPhone(bookingPhone.value);
