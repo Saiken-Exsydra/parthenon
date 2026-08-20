@@ -401,20 +401,27 @@ const gallery = [
       background: rgba(255, 255, 255, 0.04);
     }
 
-    .booking-step { margin: 0 0 1rem; color: rgba(255, 255, 255, 0.58); font-size: 0.72rem; letter-spacing: 0.18em; text-transform: uppercase; }
-    .booking-service { display: grid; gap: 0.35rem; margin: 0 0 1.25rem; }
+    :global(.booking-step) { margin: 0 0 0.7rem; color: rgba(255, 255, 255, 0.58); font-size: 0.72rem; letter-spacing: 0.18em; text-transform: uppercase; }
+    .booking-service { display: grid; gap: 0.35rem; margin: 1rem 0 1.25rem; padding: 0.9rem 1rem; border: 1px solid rgba(255, 255, 255, 0.18); border-left: 3px solid #c9a55c; border-radius: 8px; background: rgba(255, 255, 255, 0.05); }
     .booking-service__name { font-family: var(--font-display); font-size: 1.5rem; line-height: 1.2; }
     .booking-service__price { color: rgba(255, 255, 255, 0.68); font-size: 0.9rem; }
     .booking-form { display: grid; gap: 1rem; }
     .booking-field { display: grid; gap: 0.4rem; }
     .booking-field label { font-size: 0.82rem; font-weight: 700; }
     .booking-field input { width: 100%; min-height: 50px; padding: 0.75rem 0.85rem; border: 1px solid rgba(255, 255, 255, 0.28); border-radius: 8px; background: #fff; color: #0d1b2a; font: inherit; }
-    .booking-actions { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 0.4rem; }
-    .booking-button { min-height: 50px; padding: 0.8rem 1rem; border: 1px solid #fff; border-radius: 8px; background: #fff; color: #0d1b2a; cursor: pointer; font: inherit; font-size: 0.76rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; }
-    .booking-button--secondary { background: transparent; color: #fff; }
+    .booking-actions { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 1rem; }
+    .booking-button { display: inline-flex; align-items: center; justify-content: center; min-height: 50px; padding: 0.8rem 1rem; border: 1px solid #fff; border-radius: 8px; background: #fff; color: #0d1b2a; cursor: pointer; font: inherit; font-size: 0.76rem; font-weight: 700; letter-spacing: 0.12em; text-align: center; text-transform: uppercase; transition: border-color 160ms ease, background 160ms ease, color 160ms ease, transform 160ms ease; }
+    .booking-button:hover { transform: translateY(-1px); }
+    .booking-button--secondary { border-color: rgba(255, 255, 255, 0.42); background: transparent; color: #fff; }
     .booking-button--whatsapp { border-color: #25d366; background: #25d366; color: #fff; }
-    .booking-note, .booking-error { margin: 1rem 0 0; font-size: 0.9rem; }
-    .booking-note { color: rgba(255, 255, 255, 0.7); }
+    :global(.booking-service-options) { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0.75rem; margin-top: 1rem; }
+    :global(.booking-service-option) { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 0.85rem; width: 100%; min-height: 68px; padding: 0.95rem 1rem; border: 1px solid rgba(255, 255, 255, 0.22); border-radius: 8px; background: rgba(255, 255, 255, 0.04); color: #fff; cursor: pointer; font: inherit; text-align: left; transition: background 160ms ease, border-color 160ms ease, transform 160ms ease; }
+    :global(.booking-service-option:hover) { border-color: #c9a55c; background: rgba(201, 165, 92, 0.12); transform: translateY(-1px); }
+    :global(.booking-service-option[aria-pressed="true"]) { border-color: #c9a55c; background: rgba(201, 165, 92, 0.16); box-shadow: inset 3px 0 0 #c9a55c; }
+    :global(.booking-service-option__name) { font-family: var(--font-display); font-size: 1.12rem; line-height: 1.2; }
+    :global(.booking-service-option__price) { color: rgba(255, 255, 255, 0.72); font-size: 0.88rem; font-weight: 700; white-space: nowrap; }
+    :global(.booking-note), .booking-error { margin: 1rem 0 0; font-size: 0.9rem; }
+    :global(.booking-note) { color: rgba(255, 255, 255, 0.7); }
     .booking-error { color: #ffb6c6; }
     .booking-loading { margin: 1.25rem 0 0; color: rgba(255, 255, 255, 0.72); font-size: 0.9rem; }
     .cal-scheduler { min-height: 420px; margin-top: 1rem; overflow: hidden; border-radius: 8px; }
@@ -428,6 +435,8 @@ const gallery = [
     .booking-summary div { display: flex; justify-content: space-between; gap: 1rem; }
     .booking-summary small { color: rgba(255, 255, 255, 0.56); text-transform: uppercase; letter-spacing: 0.1em; }
     .booking-summary strong { text-align: right; }
+    .booking-price-reminder { margin: -0.55rem 0 1.5rem !important; color: #fff !important; font-size: 0.95rem; }
+    .booking-price-reminder strong { color: #e4c379; }
     [hidden] { display: none !important; }
     button:focus-visible, a:focus-visible, input:focus-visible { outline: 3px solid rgba(154, 31, 61, 0.72); outline-offset: 3px; }
 
@@ -673,6 +682,7 @@ const gallery = [
       .contact-grid { grid-template-columns: 0.9fr 1.1fr; align-items: start; }
       .contact-actions { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .booking-panel { padding: 1.75rem; }
+      :global(.booking-service-options) { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     }
 
     @media (min-width: 980px) {
@@ -771,7 +781,7 @@ const gallery = [
         <div class="booking-panel" id="booking-panel">
           <div id="booking-selection">
             <p class="booking-step">1. Serviço</p>
-            <p class="booking-note">Escolha um serviço acima para começar seu agendamento.</p>
+            <p class="booking-note">Escolha um serviço para continuar.</p>
           </div>
           <div id="booking-details" hidden>
             <p class="booking-step">2. Seus dados</p>
@@ -796,14 +806,14 @@ const gallery = [
             </form>
           </div>
           <div id="booking-unavailable" hidden>
-            <p class="booking-step">Agendamento online</p>
+            <p class="booking-step">Atendimento personalizado</p>
             <div class="booking-service">
               <span class="booking-service__name" id="booking-unavailable-service"></span>
               <span class="booking-service__price" id="booking-unavailable-price"></span>
             </div>
-            <p class="booking-note">Este serviço ainda não está disponível para agendamento online. Fale com Marco pelo WhatsApp para encontrar o melhor horário.</p>
+            <p class="booking-note">Este serviço precisa ser combinado diretamente com o barbeiro antes do agendamento.</p>
             <div class="booking-actions">
-              <a class="booking-button booking-button--whatsapp" id="booking-unavailable-whatsapp" target="_blank" rel="noopener">Chamar no WhatsApp</a>
+              <a class="booking-button booking-button--whatsapp" id="booking-unavailable-whatsapp" target="_blank" rel="noopener">Falar no WhatsApp</a>
               <button class="booking-button booking-button--secondary" type="button" data-booking-change>Trocar serviço</button>
             </div>
           </div>
@@ -831,6 +841,7 @@ const gallery = [
               <div><small>Data</small><strong id="booking-success-date"></strong></div>
               <div><small>Horário</small><strong id="booking-success-time"></strong></div>
             </div>
+            <p class="booking-price-reminder">Valor do serviço: <strong id="booking-success-price"></strong></p>
             <p>Seu horário já está confirmado. Para facilitar o contato com a barbearia, você pode enviar uma confirmação pelo WhatsApp. A mensagem já estará pronta. É só enviar.</p>
             <div class="booking-actions">
               <a class="booking-button booking-button--whatsapp" id="booking-whatsapp-confirmation" target="_blank" rel="noopener">Abrir WhatsApp</a>
@@ -1020,8 +1031,8 @@ const gallery = [
       setBookingServiceText('booking-service-name', 'booking-service-price', service);
       setBookingServiceText('booking-calendar-service', 'booking-calendar-price', service);
       setBookingServiceText('booking-unavailable-service', 'booking-unavailable-price', service);
-      document.getElementById('booking-unavailable-whatsapp').href = `${bookingConfig.whatsappUrl}?text=${encodeURIComponent(`Olá! Gostaria de agendar ${service.name} (${service.price}).`)}`;
-      if (!service.bookable || !service.calLink) {
+      document.getElementById('booking-unavailable-whatsapp').href = `${bookingConfig.whatsappUrl}?text=${encodeURIComponent(`Olá! Vi o serviço de ${service.name} no site da Parthenon e gostaria de conversar sobre ele antes de agendar.`)}`;
+      if (service.bookingMode === 'whatsapp') {
         setBookingView(bookingUnavailable);
       } else {
         setBookingView(bookingDetails);
@@ -1041,15 +1052,27 @@ const gallery = [
       prompt.textContent = 'Escolha o serviço que deseja agendar.';
       bookingSelection.append(prompt);
       const choices = document.createElement('div');
-      choices.className = 'booking-actions';
+      choices.className = 'booking-service-options';
       serviceIds.forEach((serviceId) => {
         const service = bookingServicesById.get(serviceId);
         if (!service) return;
         const button = document.createElement('button');
         button.type = 'button';
-        button.className = 'booking-button booking-button--secondary';
-        button.textContent = `${service.name} - ${service.price}`;
-        button.addEventListener('click', () => selectBookingService(service.id));
+        button.className = 'booking-service-option';
+        button.setAttribute('aria-label', `${service.name}, ${service.price}`);
+        button.setAttribute('aria-pressed', String(service.id === selectedBookingService?.id));
+        const name = document.createElement('span');
+        name.className = 'booking-service-option__name';
+        name.textContent = service.name;
+        const price = document.createElement('span');
+        price.className = 'booking-service-option__price';
+        price.textContent = service.price;
+        button.append(name, price);
+        button.addEventListener('click', () => {
+          choices.querySelectorAll('.booking-service-option').forEach((option) => option.setAttribute('aria-pressed', 'false'));
+          button.setAttribute('aria-pressed', 'true');
+          selectBookingService(service.id);
+        });
         choices.append(button);
       });
       bookingSelection.append(choices);
@@ -1065,8 +1088,14 @@ const gallery = [
       if (clearClientDetails) {
         bookingName.value = '';
         bookingPhone.value = '';
+        document.getElementById('booking-success-copy').textContent = '';
+        document.getElementById('booking-success-service').textContent = '';
+        document.getElementById('booking-success-date').textContent = '';
+        document.getElementById('booking-success-time').textContent = '';
+        document.getElementById('booking-success-price').textContent = '';
+        document.getElementById('booking-whatsapp-confirmation').removeAttribute('href');
       }
-      bookingSelection.innerHTML = '<p class="booking-step">1. Serviço</p><p class="booking-note">Escolha um serviço acima para começar seu agendamento.</p>';
+      bookingSelection.innerHTML = '<p class="booking-step">1. Serviço</p><p class="booking-note">Escolha um serviço para continuar.</p>';
       setBookingView(bookingSelection);
       clearBookingErrors();
     };
@@ -1119,6 +1148,7 @@ const gallery = [
       document.getElementById('booking-success-service').textContent = selectedService.name;
       document.getElementById('booking-success-date').textContent = formattedDate;
       document.getElementById('booking-success-time').textContent = formattedTime;
+      document.getElementById('booking-success-price').textContent = selectedService.price;
       const message = [
         'Olá! Acabei de fazer um agendamento pelo site da Parthenon.',
         '',
@@ -1126,9 +1156,9 @@ const gallery = [
         `Serviço: ${selectedService.name}`,
         `Data: ${formattedDate}`,
         `Horário: ${formattedTime}`,
+        `Valor informado no site: ${selectedService.price}`,
         '',
-        'Meu horário já foi confirmado pelo site. Se precisar falar comigo sobre o agendamento, pode usar este número.',
-        booking.uid ? `\nCódigo do agendamento: ${booking.uid}` : '',
+        'Meu horário já foi confirmado pelo site.',
       ].filter(Boolean).join('\n');
       document.getElementById('booking-whatsapp-confirmation').href = `${bookingConfig.whatsappUrl}?text=${encodeURIComponent(message)}`;
       calendarHost.replaceChildren();
@@ -1145,7 +1175,7 @@ const gallery = [
     });
 
     document.querySelectorAll('[data-booking-change]').forEach((button) => {
-      button.addEventListener('click', showInitialBookingSelection);
+      button.addEventListener('click', () => showInitialBookingSelection(true));
     });
 
     document.getElementById('booking-back-home')?.addEventListener('click', () => {
@@ -1161,7 +1191,7 @@ const gallery = [
       clearBookingErrors();
       const name = bookingName.value.trim();
       const phone = normalizedBrazilPhone(bookingPhone.value);
-      if (!selectedBookingService || !selectedBookingService.calLink) return;
+      if (!selectedBookingService || selectedBookingService.bookingMode !== 'calendar' || !selectedBookingService.calLink) return;
       if (calEmbedMounting) return;
       if (name.length < 2) {
         bookingFormError.textContent = 'Informe seu nome para continuar.';

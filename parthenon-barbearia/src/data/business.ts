@@ -11,24 +11,24 @@ export type BookingService = {
   name: string;
   price: string;
   description: string;
+  bookingMode: 'calendar' | 'whatsapp';
   calLink: string | null;
-  bookable: boolean;
 };
 
-// Add each real Cal.com event URL or "username/event-slug" to calLink below,
-// then set bookable to true. Keep a service unavailable until its event type exists.
+// Calendar services have a real Cal.com event. Consultation services intentionally
+// open WhatsApp, so Marco can confirm the right treatment before scheduling.
 export const bookingServices: BookingService[] = [
-  { id: 'sobrancelha', name: 'Sobrancelha', price: 'R$ 20', description: 'Design de sobrancelha. Não fazemos rena.', calLink: null, bookable: false },
-  { id: 'pezinho', name: 'Pezinho', price: 'R$ 20', description: 'Acabamento rápido para manter visual alinhado.', calLink: null, bookable: false },
-  { id: 'barba-simples', name: 'Barba simples', price: 'R$ 30', description: 'Barba bem cuidada e alinhada.', calLink: null, bookable: false },
-  { id: 'barba-pigmentacao', name: 'Barba + pigmentação', price: 'R$ 50', description: 'Barba com acabamento e pigmentação.', calLink: null, bookable: false },
-  { id: 'corte-simples', name: 'Corte simples', price: 'R$ 30', description: 'Corte clássico, com acabamento preciso.', calLink: 'marco-ams/corte-simples', bookable: true },
-  { id: 'corte-degrade-simples', name: 'Corte degradê simples', price: 'R$ 40', description: 'Degradê leve e bem definido.', calLink: null, bookable: false },
-  { id: 'corte-degrade-navalhado', name: 'Corte degradê navalhado', price: 'R$ 50', description: 'Degradê navalhado, com acabamento detalhado.', calLink: null, bookable: false },
-  { id: 'selagem', name: 'Selagem', price: 'A partir de R$ 70', description: 'Tratamento sujeito à avaliação.', calLink: null, bookable: false },
-  { id: 'botox-capilar', name: 'Botox capilar', price: 'A partir de R$ 70', description: 'Tratamento sujeito à avaliação.', calLink: null, bookable: false },
-  { id: 'descoloracao-capilar', name: 'Descoloração capilar', price: 'R$ 120', description: 'Tratamento capilar.', calLink: null, bookable: false },
-  { id: 'luzes-capilar', name: 'Luzes capilar', price: 'R$ 120', description: 'Tratamento capilar.', calLink: null, bookable: false },
+  { id: 'sobrancelha', name: 'Sobrancelha', price: 'R$ 20', description: 'Design de sobrancelha. Não fazemos rena.', bookingMode: 'calendar', calLink: 'marco-ams/sobrancelha' },
+  { id: 'pezinho', name: 'Pezinho', price: 'R$ 20', description: 'Acabamento rápido para manter visual alinhado.', bookingMode: 'calendar', calLink: 'marco-ams/pezinho' },
+  { id: 'barba-simples', name: 'Barba simples', price: 'R$ 30', description: 'Barba bem cuidada e alinhada.', bookingMode: 'calendar', calLink: 'marco-ams/barba-simples' },
+  { id: 'barba-pigmentacao', name: 'Barba + pigmentação', price: 'R$ 50', description: 'Barba com acabamento e pigmentação.', bookingMode: 'calendar', calLink: 'marco-ams/barba-pigmentacao' },
+  { id: 'corte-simples', name: 'Corte simples', price: 'R$ 30', description: 'Corte clássico, com acabamento preciso.', bookingMode: 'calendar', calLink: 'marco-ams/corte-simples' },
+  { id: 'corte-degrade-simples', name: 'Corte degradê simples', price: 'R$ 40', description: 'Degradê leve e bem definido.', bookingMode: 'calendar', calLink: 'marco-ams/corte-degrade-simples' },
+  { id: 'corte-degrade-navalhado', name: 'Corte degradê navalhado', price: 'R$ 50', description: 'Degradê navalhado, com acabamento detalhado.', bookingMode: 'calendar', calLink: 'marco-ams/corte-degrade-navalhado' },
+  { id: 'selagem', name: 'Selagem', price: 'A partir de R$ 70', description: 'Tratamento sujeito à avaliação.', bookingMode: 'whatsapp', calLink: null },
+  { id: 'botox-capilar', name: 'Botox capilar', price: 'A partir de R$ 70', description: 'Tratamento sujeito à avaliação.', bookingMode: 'whatsapp', calLink: null },
+  { id: 'descoloracao-capilar', name: 'Descoloração capilar', price: 'R$ 120', description: 'Tratamento capilar.', bookingMode: 'whatsapp', calLink: null },
+  { id: 'luzes-capilar', name: 'Luzes capilar', price: 'R$ 120', description: 'Tratamento capilar.', bookingMode: 'whatsapp', calLink: null },
 ];
 
 export const serviceGroups = [
