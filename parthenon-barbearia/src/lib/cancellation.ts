@@ -17,6 +17,7 @@ export type CancellationErrorCode =
   | 'NOT_FOUND'
   | 'RATE_LIMITED'
   | 'BOOKING_EXPIRED'
+  | 'BOOKING_PHONE_UNAVAILABLE'
   | 'ALREADY_CANCELLED'
   | 'CAL_UNAVAILABLE'
   | 'INTERNAL_ERROR';

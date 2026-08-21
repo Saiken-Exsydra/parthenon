@@ -1093,6 +1093,7 @@ const gallery = [
       NOT_FOUND: 'Não encontramos um agendamento ativo com esses dados. Confira o código e o telefone e tente novamente.',
       RATE_LIMITED: 'Muitas tentativas. Aguarde alguns minutos e tente novamente.',
       BOOKING_EXPIRED: 'Este agendamento já passou e não pode mais ser cancelado pelo site.',
+      BOOKING_PHONE_UNAVAILABLE: 'Seu horário está confirmado, mas não foi possível gerar o código de cancelamento. Se precisar cancelar, fale com a barbearia pelo WhatsApp.',
       ALREADY_CANCELLED: 'Este agendamento já foi cancelado.',
       CANCELLATION_NOT_CONFIGURED: 'O cancelamento online ainda está sendo preparado. Fale com a barbearia pelo WhatsApp.',
       CAL_UNAVAILABLE: 'Não foi possível confirmar o cancelamento agora. Tente novamente em alguns minutos.',
@@ -1246,34 +1247,38 @@ const gallery = [
       return booking.name || booking.attendee?.name || attendees[0]?.name || responses.name?.value || responses.name || 'Cliente';
     };
 
-    const bookingPhone = (booking) => {
-      const source = booking.booking || booking;
-      const responses = booking.responses || source.responses || source.bookingFieldsResponses || {};
-      const attendees = booking.attendees || source.attendees || [];
-      return booking.attendee?.phoneNumber || source.attendee?.phoneNumber || attendees[0]?.phoneNumber || responses.attendeePhoneNumber?.value || responses.attendeePhoneNumber || responses.phone?.value || responses.phone || '';
-    };
-
     const bookingUid = (booking) => booking.uid || booking.bookingUid || booking.booking?.uid || booking.booking?.bookingUid || '';
 
-    const registerCancellationCode = async (booking, services, appointmentStart, appointmentEnd) => {
+    const registerCancellationCode = async (booking, services) => {
       const uid = bookingUid(booking);
-      const phone = bookingPhone(booking);
       const codePanel = document.getElementById('booking-code-panel');
       const codeTarget = document.getElementById('booking-cancellation-code');
       const helper = document.getElementById('booking-code-helper');
-      if (!uid || !phone) return;
       codePanel.hidden = false;
+      if (!uid) {
+        codeTarget.textContent = '—';
+        helper.textContent = cancellationErrorMessage('BOOKING_PHONE_UNAVAILABLE');
+        console.warn('Cancellation code registration failed:', 'BOOKING_UID_UNAVAILABLE');
+        return null;
+      }
       codeTarget.textContent = '••••';
       helper.textContent = 'Preparando seu código de cancelamento…';
       try {
-        const response = await fetch('/api/cancellations/register', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ bookingUid: uid, phone, services: services.map((service) => ({ id: service.id, name: service.name, priceCents: Math.round(service.priceValue * 100) })), appointmentStart, appointmentEnd }) });
+        const response = await fetch('/api/cancellations/register', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ bookingUid: uid, serviceIds: services.map((service) => service.id) }) });
         const payload = await response.json();
-        if (!response.ok || !payload.ok || !/^\d{4}$/.test(payload.code)) throw new Error(payload.code || 'registration failed');
+        if (!response.ok || !payload.ok || !/^\d{4}$/.test(payload.code)) {
+          console.warn('Cancellation code registration failed:', payload.code || 'INTERNAL_ERROR');
+          codeTarget.textContent = '—';
+          helper.textContent = cancellationErrorMessage(payload.code);
+          return null;
+        }
         codeTarget.textContent = payload.code;
         helper.textContent = 'Guarde este código. Ele será pedido junto ao telefone se precisar cancelar.';
         return payload.code;
       } catch {
-        codePanel.hidden = true;
+        console.warn('Cancellation code registration failed:', 'INTERNAL_ERROR');
+        codeTarget.textContent = '—';
+        helper.textContent = cancellationErrorMessage('INTERNAL_ERROR');
         return null;
       }
     };
@@ -1311,7 +1316,7 @@ const gallery = [
       calendarHost.replaceChildren();
       setBookingView(bookingSuccess);
       scrollToBooking();
-      const cancellationCode = await registerCancellationCode(booking, services, booking.startTime || booking.booking?.startTime, booking.endTime || booking.booking?.endTime || null);
+      const cancellationCode = await registerCancellationCode(booking, services);
       document.getElementById('booking-whatsapp-confirmation').href = `${bookingConfig.whatsappUrl}?text=${encodeURIComponent(buildMessage(cancellationCode))}`;
     };
 

@@ -1,4 +1,5 @@
-import { createShortCode, isPastAppointment, normalizeBrazilianPhone, serializeServices, totalServicePrice } from '../../../src/lib/cancellation';
+import { bookingServices } from '../../../src/data/business';
+import { createShortCode, isPastAppointment, normalizeBrazilianPhone, totalServicePrice, type ServiceSummary } from '../../../src/lib/cancellation';
 import { getCalBooking, CalError } from '../../_lib/cal';
 import { apiError, json, readJson } from '../../_lib/http';
 import { cleanupExpiredRecords, keyedHash } from '../../_lib/security';
@@ -10,11 +11,10 @@ export const onRequestPost = async ({ request, env }: PagesContext): Promise<Res
   if (!env.PARTHENON_DB || !env.CANCELLATION_PEPPER) return apiError('CANCELLATION_NOT_CONFIGURED', 503);
   const body = await readJson(request);
   const bookingUid = typeof body?.bookingUid === 'string' ? body.bookingUid.trim().slice(0, 160) : '';
-  const phone = normalizeBrazilianPhone(body?.phone);
-  const services = serializeServices(body?.services);
-  const appointmentStart = typeof body?.appointmentStart === 'string' ? body.appointmentStart : '';
-  const appointmentEnd = typeof body?.appointmentEnd === 'string' ? body.appointmentEnd : null;
-  if (!bookingUid || !phone || !services || !appointmentStart || Number.isNaN(Date.parse(appointmentStart))) return apiError('INVALID_INPUT', 400);
+  const serviceIds = Array.isArray(body?.serviceIds) && body.serviceIds.every((id) => typeof id === 'string') ? body.serviceIds : null;
+  const selectedServices = serviceIds?.map((id) => bookingServices.find((service) => service.id === id && service.bookingMode === 'calendar'));
+  if (!bookingUid || !serviceIds || serviceIds.length === 0 || serviceIds.length > 12 || new Set(serviceIds).size !== serviceIds.length || !selectedServices?.every(Boolean)) return apiError('INVALID_INPUT', 400);
+  const services: ServiceSummary[] = selectedServices.map((service) => ({ id: service!.id, name: service!.name, priceCents: Math.round((service!.priceValue || 0) * 100) }));
 
   const db = env.PARTHENON_DB;
   const now = new Date();
@@ -26,8 +26,10 @@ export const onRequestPost = async ({ request, env }: PagesContext): Promise<Res
   try {
     const liveBooking = await getCalBooking(bookingUid, env.CAL_API_KEY);
     if (liveBooking.status.toLowerCase() === 'cancelled') return apiError('ALREADY_CANCELLED', 409);
-    if (liveBooking.phone && normalizeBrazilianPhone(liveBooking.phone) !== phone) return apiError('INVALID_INPUT', 400);
-    const authoritativeStart = liveBooking.start && !Number.isNaN(Date.parse(liveBooking.start)) ? liveBooking.start : appointmentStart;
+    const phone = normalizeBrazilianPhone(liveBooking.phone);
+    if (!phone) return apiError('BOOKING_PHONE_UNAVAILABLE', 422);
+    const authoritativeStart = liveBooking.start && !Number.isNaN(Date.parse(liveBooking.start)) ? liveBooking.start : null;
+    if (!authoritativeStart) return apiError('CAL_UNAVAILABLE', 503);
     if (isPastAppointment(authoritativeStart, now.getTime())) return apiError('BOOKING_EXPIRED', 409);
     const phoneHash = await keyedHash(phone, env.CANCELLATION_PEPPER);
     for (let attempt = 0; attempt < 24; attempt += 1) {
@@ -37,7 +39,7 @@ export const onRequestPost = async ({ request, env }: PagesContext): Promise<Res
           (booking_uid, short_code, phone_hash, services_json, total_price_cents, appointment_start, appointment_end, status, created_at)
           VALUES (?, ?, ?, ?, ?, ?, ?, 'active', ?)`).bind(
           bookingUid, shortCode, phoneHash, JSON.stringify(services), totalServicePrice(services), authoritativeStart,
-          liveBooking.end || appointmentEnd, now.toISOString(),
+          liveBooking.end, now.toISOString(),
         ).run();
         return json({ ok: true, code: shortCode });
       } catch (error) {

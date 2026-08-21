@@ -19,10 +19,18 @@ const requestCal = async (path: string, init: RequestInit, apiKey?: string): Pro
   } finally { clearTimeout(timer); }
 };
 
+const responseValue = (value: unknown): string | null => {
+  if (typeof value === 'string') return value;
+  if (value && typeof value === 'object' && typeof (value as Record<string, unknown>).value === 'string') return (value as Record<string, string>).value;
+  return null;
+};
+
 const bookingFromResponse = (data: unknown): LiveBooking => {
   const booking = data && typeof data === 'object' ? data as Record<string, any> : {};
   const attendee = Array.isArray(booking.attendees) ? booking.attendees[0] : undefined;
-  return { status: String(booking.status || ''), start: booking.start || booking.startTime || null, end: booking.end || booking.endTime || null, phone: attendee?.phoneNumber || booking.attendee?.phoneNumber || null };
+  const responses = booking.bookingFieldsResponses && typeof booking.bookingFieldsResponses === 'object' ? booking.bookingFieldsResponses : {};
+  const fieldPhone = responseValue(responses.attendeePhoneNumber) || responseValue(responses.phone);
+  return { status: String(booking.status || ''), start: booking.start || booking.startTime || null, end: booking.end || booking.endTime || null, phone: attendee?.phoneNumber || booking.attendee?.phoneNumber || fieldPhone };
 };
 
 export const getCalBooking = async (bookingUid: string, apiKey?: string): Promise<LiveBooking> => {
