@@ -45,10 +45,18 @@ GET /api/cancellations/health
 Expected configured response:
 
 ```json
-{"ok":true,"configured":true,"calApiKeyConfigured":true}
+{
+  "ok": true,
+  "databaseConfigured": true,
+  "databaseReachable": true,
+  "schemaReady": true,
+  "pepperConfigured": true,
+  "calApiKeyConfigured": true,
+  "configured": true
+}
 ```
 
-`calApiKeyConfigured` may be `false` only if the unauthenticated booking-UID API route has been deliberately verified for the production Cal.com configuration.
+Each field is diagnostic only and never exposes a secret, D1 identifier, or customer data. `databaseConfigured` confirms the `PARTHENON_DB` binding exists; `databaseReachable` confirms a read-only `SELECT 1` succeeds; `schemaReady` confirms both cancellation tables exist; `pepperConfigured` confirms the `CANCELLATION_PEPPER` secret exists; and `calApiKeyConfigured` confirms the `CAL_API_KEY` secret exists. `configured` is true only when every required cancellation dependency is ready. If a field is false, check that specific Cloudflare binding, secret, or migration.
 
 ## 7. Real booking and cancellation test
 

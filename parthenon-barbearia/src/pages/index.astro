@@ -857,7 +857,12 @@ const gallery = [
             <fieldset class="booking-service-options" id="booking-service-options" aria-describedby="booking-selection-summary">
               <legend class="sr-only">Serviços para agendar</legend>
               {calendarServices.map(service => (
-                <label class="booking-service-option" data-booking-option>
+                <label
+                  class="booking-service-option"
+                  data-booking-option
+                  data-service-id={service.id}
+                  data-exclusive-group={service.exclusiveGroup || ''}
+                >
                   <input type="checkbox" name="booking-services" value={service.id} />
                   <span class="booking-service-option__check" aria-hidden="true"></span>
                   <span class="booking-service-option__name">{service.name}</span>
@@ -1148,11 +1153,20 @@ const gallery = [
     const syncServiceSelection = () => {
       const services = selectedBookingServices();
       const count = services.length;
+      const selectedExclusiveGroups = new Map(
+        services
+          .filter((service) => service.exclusiveGroup)
+          .map((service) => [service.exclusiveGroup, service.id])
+      );
       bookingSelectedCount.textContent = count === 1 ? '1 servi\u00e7o selecionado' : `${count} servi\u00e7os selecionados`;
       bookingSelectedTotal.textContent = `Total: ${selectedServicesTotalLabel()}`;
       bookingContinue.disabled = count === 0;
       document.querySelectorAll('input[name="booking-services"]').forEach((input) => {
-        input.checked = selectedBookingServiceIds.has(input.value);
+        const service = bookingServicesById.get(input.value);
+        const isSelected = selectedBookingServiceIds.has(input.value);
+        const selectedSiblingId = service?.exclusiveGroup ? selectedExclusiveGroups.get(service.exclusiveGroup) : null;
+        input.checked = isSelected;
+        input.closest('[data-booking-option]').hidden = Boolean(selectedSiblingId && selectedSiblingId !== service.id);
       });
     };
 
@@ -1378,8 +1392,19 @@ const gallery = [
           input.checked = false;
           return;
         }
-        if (input.checked) selectedBookingServiceIds.add(input.value);
-        else selectedBookingServiceIds.delete(input.value);
+        if (input.checked) {
+          if (service.exclusiveGroup) {
+            selectedBookingServiceIds.forEach((selectedServiceId) => {
+              const selectedService = bookingServicesById.get(selectedServiceId);
+              if (selectedService?.exclusiveGroup === service.exclusiveGroup) {
+                selectedBookingServiceIds.delete(selectedServiceId);
+              }
+            });
+          }
+          selectedBookingServiceIds.add(input.value);
+        } else {
+          selectedBookingServiceIds.delete(input.value);
+        }
         syncServiceSelection();
       });
     });
