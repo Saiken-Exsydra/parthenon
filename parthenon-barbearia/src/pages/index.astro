@@ -475,9 +475,21 @@ const gallery = [
     .booking-success-mark { display: grid; width: 2.4rem; height: 2.4rem; margin: 0 auto 1rem; place-items: center; border-radius: 50%; background: #25d366; color: #fff; font-size: 1.35rem; font-weight: 700; line-height: 1; }
     .booking-success h3 { margin: 0 0 0.75rem; font-family: var(--font-display); font-size: clamp(2rem, 8vw, 2.7rem); line-height: 1.1; }
     .booking-success p { margin: 0 0 1.25rem; color: rgba(255, 255, 255, 0.74); }
+    .booking-code { display: grid; gap: 0.35rem; margin: 0 auto 1.25rem; padding: 1rem; border: 1px solid rgba(201, 165, 92, 0.52); border-radius: 8px; background: rgba(201, 165, 92, 0.1); }
+    .booking-code small { color: rgba(255, 255, 255, 0.66); text-transform: uppercase; letter-spacing: 0.12em; }
+    .booking-code strong { color: #e8cb8d; font-size: clamp(2rem, 9vw, 2.8rem); letter-spacing: 0.16em; line-height: 1; }
+    .booking-code p { margin: 0; font-size: 0.84rem; }
     .booking-summary { display: grid; gap: 0.7rem; margin: 0 auto 1.5rem; padding: 1rem; border: 1px solid rgba(255, 255, 255, 0.16); border-radius: 8px; text-align: left; }
     .booking-summary div { display: flex; justify-content: space-between; gap: 1rem; }
     .booking-summary .booking-summary__stack { display: grid; gap: 0.4rem; }
+    .cancellation-entry { text-align: center; }
+    .cancellation-entry p { margin: 0 0 1.1rem; color: rgba(255, 255, 255, 0.72); }
+    .cancellation-form { display: grid; gap: 1rem; }
+    .cancellation-code-input { font-size: 1.5rem !important; font-weight: 700; letter-spacing: 0.16em; text-align: center; }
+    .cancellation-review { display: grid; gap: 1rem; }
+    .cancellation-review__question { font-size: 1rem; font-weight: 700; }
+    .booking-button--danger { border-color: #b95061; background: #9a1f3d; color: #fff; }
+    .booking-button--danger:hover { border-color: #e28a98; background: #b32d4d; }
     .booking-summary small { color: rgba(255, 255, 255, 0.56); text-transform: uppercase; letter-spacing: 0.1em; }
     .booking-summary strong { text-align: right; }
     .booking-price-reminder { margin: -0.55rem 0 1.5rem !important; color: #fff !important; font-size: 0.95rem; }
@@ -778,6 +790,7 @@ const gallery = [
         <p class="hero-byline">{OWNER} · Parthenon Barbearia</p>
         <div class="hero-actions">
           <a class="cta" href="#agendar">Agendar horário</a>
+          <a class="cta-secondary" href="#cancelar">Cancelar agendamento</a>
           <a class="cta-secondary" href="#servicos">Ver serviços</a>
         </div>
       </div>
@@ -888,11 +901,39 @@ const gallery = [
               <div><small>Horário</small><strong id="booking-success-time"></strong></div>
             </div>
             <p class="booking-price-reminder">Valor total: <strong id="booking-success-price"></strong></p>
+            <div class="booking-code" id="booking-code-panel" hidden>
+              <small>Código do agendamento</small>
+              <strong id="booking-cancellation-code"></strong>
+              <p id="booking-code-helper">Guarde este código. Ele será pedido junto ao telefone se precisar cancelar.</p>
+            </div>
             <p>Seu horário já está confirmado. Para facilitar o contato com a barbearia, você pode enviar uma confirmação pelo WhatsApp. A mensagem já estará pronta. É só enviar.</p>
             <div class="booking-actions">
               <a class="booking-button booking-button--whatsapp" id="booking-whatsapp-confirmation" target="_blank" rel="noopener">Abrir WhatsApp</a>
               <a class="booking-button booking-button--secondary" id="booking-back-home" href="#inicio">Voltar ao início</a>
             </div>
+          </div>
+          <div class="cancellation-entry" id="cancellation-entry" hidden aria-live="polite">
+            <p class="booking-step">Cancelar agendamento</p>
+            <h3 class="booking-title">Cancelar agendamento</h3>
+            <p>Informe o código do agendamento e o telefone usado na reserva.</p>
+            <form class="cancellation-form" id="cancellation-form">
+              <div class="booking-field"><label for="cancellation-code">Código do agendamento</label><input class="cancellation-code-input" id="cancellation-code" name="code" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="4" pattern="[0-9]{4}" placeholder="0000" required /></div>
+              <div class="booking-field"><label for="cancellation-phone">Telefone</label><input id="cancellation-phone" name="phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="(34) 99999-9999" required /></div>
+              <p class="booking-error" id="cancellation-error" role="alert" hidden></p>
+              <div class="booking-actions"><button class="booking-button" type="submit">CONTINUAR</button><a class="booking-button booking-button--secondary" href="#inicio" data-cancellation-home>VOLTAR AO INÍCIO</a></div>
+            </form>
+          </div>
+          <div class="cancellation-review" id="cancellation-review" hidden aria-live="polite">
+            <p class="booking-step">Cancelar agendamento</p>
+            <h3 class="booking-title">Encontramos seu agendamento</h3>
+            <div class="booking-summary"><div class="booking-summary__stack"><small>Serviços</small><ul class="booking-service-list" id="cancellation-services"></ul></div><div><small>Data</small><strong id="cancellation-date"></strong></div><div><small>Horário</small><strong id="cancellation-time"></strong></div><div><small>Valor total</small><strong id="cancellation-price"></strong></div></div>
+            <p class="cancellation-review__question">Tem certeza de que deseja cancelar este agendamento?</p>
+            <p class="booking-error" id="cancellation-review-error" role="alert" hidden></p>
+            <div class="booking-actions"><button class="booking-button booking-button--secondary" id="cancellation-keep" type="button">MANTER AGENDAMENTO</button><button class="booking-button booking-button--danger" id="cancellation-confirm" type="button">SIM, CANCELAR AGENDAMENTO</button></div>
+          </div>
+          <div class="booking-success" id="cancellation-success" hidden aria-live="polite">
+            <p class="booking-step">Cancelamento confirmado</p><img class="booking-success-logo" src="/logo.png" alt="Parthenon Barbearia" /><span class="booking-success-mark" aria-hidden="true">✓</span><h3>Agendamento cancelado</h3><p>Seu agendamento foi cancelado com sucesso.</p>
+            <div class="booking-actions"><a class="booking-button booking-button--secondary" href="#inicio" data-cancellation-home>VOLTAR AO INÍCIO</a></div>
           </div>
         </div>
       </div>
@@ -1006,6 +1047,9 @@ const gallery = [
     const bookingSelection = document.getElementById('booking-selection');
     const bookingCalendar = document.getElementById('booking-calendar');
     const bookingSuccess = document.getElementById('booking-success');
+    const cancellationEntry = document.getElementById('cancellation-entry');
+    const cancellationReview = document.getElementById('cancellation-review');
+    const cancellationSuccess = document.getElementById('cancellation-success');
     const bookingCalError = document.getElementById('booking-cal-error');
     const bookingCalendarLoading = document.getElementById('booking-calendar-loading');
     const calendarHost = document.getElementById('cal-scheduler');
@@ -1021,11 +1065,12 @@ const gallery = [
     let calEmbedInitialized = false;
     let calEmbedLoadPromise = null;
     let calEmbedMounting = false;
+    let cancellationCredentials = null;
 
     const currency = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 });
 
     const setBookingView = (view) => {
-      [bookingSelection, bookingCalendar, bookingSuccess].forEach((element) => {
+      [bookingSelection, bookingCalendar, bookingSuccess, cancellationEntry, cancellationReview, cancellationSuccess].forEach((element) => {
         element.hidden = element !== view;
       });
     };
@@ -1036,6 +1081,39 @@ const gallery = [
 
     const exitBookingMode = () => {
       document.body.classList.remove('is-booking');
+    };
+
+    const cancellationErrorMessage = (code) => ({
+      INVALID_INPUT: 'Confira o código e o telefone informado.',
+      NOT_FOUND: 'Não encontramos um agendamento ativo com esses dados. Confira o código e o telefone e tente novamente.',
+      RATE_LIMITED: 'Muitas tentativas. Aguarde alguns minutos e tente novamente.',
+      BOOKING_EXPIRED: 'Este agendamento já passou e não pode mais ser cancelado pelo site.',
+      ALREADY_CANCELLED: 'Este agendamento já foi cancelado.',
+      CANCELLATION_NOT_CONFIGURED: 'O cancelamento online ainda está sendo preparado. Fale com a barbearia pelo WhatsApp.',
+      CAL_UNAVAILABLE: 'Não foi possível confirmar o cancelamento agora. Tente novamente em alguns minutos.',
+      INTERNAL_ERROR: 'Não foi possível concluir agora. Tente novamente em alguns minutos.',
+    })[code] || 'Não foi possível concluir agora. Tente novamente.';
+
+    const setCancellationError = (target, code) => {
+      target.textContent = cancellationErrorMessage(code);
+      target.hidden = false;
+    };
+
+    const resetCancellation = () => {
+      cancellationCredentials = null;
+      document.getElementById('cancellation-form').reset();
+      ['cancellation-error', 'cancellation-review-error'].forEach((id) => {
+        const target = document.getElementById(id); target.hidden = true; target.textContent = '';
+      });
+      document.getElementById('cancellation-services').replaceChildren();
+      ['cancellation-date', 'cancellation-time', 'cancellation-price'].forEach((id) => { document.getElementById(id).textContent = ''; });
+    };
+
+    const showCancellationEntry = () => {
+      enterBookingMode();
+      resetCancellation();
+      setBookingView(cancellationEntry);
+      scrollToBooking();
     };
 
     const scrollToBooking = () => {
@@ -1099,6 +1177,8 @@ const gallery = [
         document.getElementById('booking-success-time').textContent = '';
         document.getElementById('booking-success-price').textContent = '';
         document.getElementById('booking-whatsapp-confirmation').removeAttribute('href');
+        document.getElementById('booking-code-panel').hidden = true;
+        document.getElementById('booking-cancellation-code').textContent = '';
       }
       calendarHost.replaceChildren();
       calEmbedMounting = false;
@@ -1152,7 +1232,39 @@ const gallery = [
       return booking.name || booking.attendee?.name || attendees[0]?.name || responses.name?.value || responses.name || 'Cliente';
     };
 
-    const showBookingSuccess = (booking) => {
+    const bookingPhone = (booking) => {
+      const source = booking.booking || booking;
+      const responses = booking.responses || source.responses || source.bookingFieldsResponses || {};
+      const attendees = booking.attendees || source.attendees || [];
+      return booking.attendee?.phoneNumber || source.attendee?.phoneNumber || attendees[0]?.phoneNumber || responses.attendeePhoneNumber?.value || responses.attendeePhoneNumber || responses.phone?.value || responses.phone || '';
+    };
+
+    const bookingUid = (booking) => booking.uid || booking.bookingUid || booking.booking?.uid || booking.booking?.bookingUid || '';
+
+    const registerCancellationCode = async (booking, services, appointmentStart, appointmentEnd) => {
+      const uid = bookingUid(booking);
+      const phone = bookingPhone(booking);
+      const codePanel = document.getElementById('booking-code-panel');
+      const codeTarget = document.getElementById('booking-cancellation-code');
+      const helper = document.getElementById('booking-code-helper');
+      if (!uid || !phone) return;
+      codePanel.hidden = false;
+      codeTarget.textContent = '••••';
+      helper.textContent = 'Preparando seu código de cancelamento…';
+      try {
+        const response = await fetch('/api/cancellations/register', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ bookingUid: uid, phone, services: services.map((service) => ({ id: service.id, name: service.name, priceCents: Math.round(service.priceValue * 100) })), appointmentStart, appointmentEnd }) });
+        const payload = await response.json();
+        if (!response.ok || !payload.ok || !/^\d{4}$/.test(payload.code)) throw new Error(payload.code || 'registration failed');
+        codeTarget.textContent = payload.code;
+        helper.textContent = 'Guarde este código. Ele será pedido junto ao telefone se precisar cancelar.';
+        return payload.code;
+      } catch {
+        codePanel.hidden = true;
+        return null;
+      }
+    };
+
+    const showBookingSuccess = async (booking) => {
       const services = selectedBookingServices();
       if (!services.length) return;
       const parts = dateParts(booking.startTime || booking.booking?.startTime);
@@ -1166,7 +1278,7 @@ const gallery = [
       document.getElementById('booking-success-time').textContent = formattedTime;
       document.getElementById('booking-success-price').textContent = total;
       const serviceLines = services.map((service) => `* ${service.name}`);
-      const message = [
+      const buildMessage = (cancellationCode) => [
         'Ol\u00e1! Acabei de fazer um agendamento pelo site da Parthenon.',
         '',
         `Nome: ${name}`,
@@ -1178,13 +1290,15 @@ const gallery = [
         `Data: ${formattedDate}`,
         `Hor\u00e1rio: ${formattedTime}`,
         `Valor informado no site: ${total}`,
+        ...(cancellationCode ? ['', `Código para cancelamento: ${cancellationCode}`] : []),
         '',
         'Meu hor\u00e1rio j\u00e1 foi confirmado pelo site.',
       ].join('\n');
-      document.getElementById('booking-whatsapp-confirmation').href = `${bookingConfig.whatsappUrl}?text=${encodeURIComponent(message)}`;
       calendarHost.replaceChildren();
       setBookingView(bookingSuccess);
       scrollToBooking();
+      const cancellationCode = await registerCancellationCode(booking, services, booking.startTime || booking.booking?.startTime, booking.endTime || booking.booking?.endTime || null);
+      document.getElementById('booking-whatsapp-confirmation').href = `${bookingConfig.whatsappUrl}?text=${encodeURIComponent(buildMessage(cancellationCode))}`;
     };
 
     const showCalendarStep = async () => {
@@ -1272,6 +1386,58 @@ const gallery = [
 
     bookingContinue.addEventListener('click', showCalendarStep);
 
+    document.querySelectorAll('a[href="#cancelar"]').forEach((link) => {
+      link.addEventListener('click', (event) => {
+        event.preventDefault();
+        window.history.replaceState(null, '', '#cancelar');
+        showCancellationEntry();
+      });
+    });
+
+    document.getElementById('cancellation-code').addEventListener('input', (event) => {
+      event.target.value = event.target.value.replace(/\D/g, '').slice(0, 4);
+    });
+    document.getElementById('cancellation-phone').addEventListener('input', (event) => {
+      const digits = event.target.value.replace(/\D/g, '').replace(/^55(?=\d{10,11}$)/, '').slice(0, 11);
+      event.target.value = digits.length > 6 ? `(${digits.slice(0, 2)}) ${digits.slice(2, digits.length === 11 ? 7 : 6)}-${digits.slice(digits.length === 11 ? 7 : 6)}` : digits.length > 2 ? `(${digits.slice(0, 2)}) ${digits.slice(2)}` : digits;
+    });
+    document.getElementById('cancellation-form').addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const error = document.getElementById('cancellation-error'); error.hidden = true;
+      const form = new FormData(event.currentTarget);
+      const code = String(form.get('code') || '').replace(/\s/g, '');
+      const phone = String(form.get('phone') || '');
+      const submit = event.currentTarget.querySelector('button[type="submit"]'); submit.disabled = true;
+      try {
+        const response = await fetch('/api/cancellations/lookup', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ code, phone }) });
+        const payload = await response.json();
+        if (!response.ok || !payload.ok) { setCancellationError(error, payload.code); return; }
+        cancellationCredentials = { code, phone };
+        const booking = payload.booking;
+        renderServiceList(document.getElementById('cancellation-services'), booking.services || []);
+        const parts = dateParts(booking.appointmentStart);
+        document.getElementById('cancellation-date').textContent = parts?.date || 'Data confirmada no Cal.com';
+        document.getElementById('cancellation-time').textContent = parts?.time || 'Horário confirmado no Cal.com';
+        document.getElementById('cancellation-price').textContent = currency.format((booking.totalPriceCents || 0) / 100);
+        setBookingView(cancellationReview);
+        scrollToBooking();
+      } catch { setCancellationError(error, 'CAL_UNAVAILABLE'); } finally { submit.disabled = false; }
+    });
+    document.getElementById('cancellation-keep').addEventListener('click', showCancellationEntry);
+    document.getElementById('cancellation-confirm').addEventListener('click', async (event) => {
+      if (!cancellationCredentials) return showCancellationEntry();
+      const error = document.getElementById('cancellation-review-error'); error.hidden = true;
+      const button = event.currentTarget; button.disabled = true;
+      try {
+        const response = await fetch('/api/cancellations/cancel', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(cancellationCredentials) });
+        const payload = await response.json();
+        if (!response.ok || !payload.ok) { setCancellationError(error, payload.code); return; }
+        cancellationCredentials = null;
+        setBookingView(cancellationSuccess);
+        scrollToBooking();
+      } catch { setCancellationError(error, 'CAL_UNAVAILABLE'); } finally { button.disabled = false; }
+    });
+
     document.querySelectorAll('a[href="#agendar"]').forEach((link) => {
       link.addEventListener('click', (event) => {
         event.preventDefault();
@@ -1289,16 +1455,35 @@ const gallery = [
 
     document.getElementById('booking-back-home')?.addEventListener('click', () => {
       exitBookingMode();
-      showSelectionStep({ clearSelection: true, clearClientDetails: true });
+      selectedBookingServiceIds = new Set();
+      document.getElementById('booking-success-copy').textContent = '';
+      document.getElementById('booking-success-services').replaceChildren();
+      document.getElementById('booking-success-date').textContent = '';
+      document.getElementById('booking-success-time').textContent = '';
+      document.getElementById('booking-success-price').textContent = '';
+      document.getElementById('booking-whatsapp-confirmation').removeAttribute('href');
+      document.getElementById('booking-code-panel').hidden = true;
+      document.getElementById('booking-cancellation-code').textContent = '';
+      calendarHost.replaceChildren();
+      syncServiceSelection();
+      setBookingView(bookingSelection);
     });
+
+    document.querySelectorAll('[data-cancellation-home]').forEach((link) => link.addEventListener('click', () => {
+      resetCancellation();
+      exitBookingMode();
+      setBookingView(bookingSelection);
+    }));
 
     window.addEventListener('hashchange', () => {
       if (!window.location.hash || window.location.hash === '#inicio') exitBookingMode();
       if (window.location.hash === '#agendar') enterBookingMode();
+      if (window.location.hash === '#cancelar') showCancellationEntry();
     });
 
     syncServiceSelection();
     if (window.location.hash === '#agendar') enterBookingMode();
+    if (window.location.hash === '#cancelar') showCancellationEntry();
 
     const lightbox = document.getElementById('gallery-lightbox');
     const lightboxImage = document.getElementById('lightbox-image');
