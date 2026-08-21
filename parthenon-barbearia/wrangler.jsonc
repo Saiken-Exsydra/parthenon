@@ -3,5 +3,12 @@
 	// Deploy: npx wrangler pages deploy dist --project-name=parthenon-barbearia
 	"name": "parthenon-barbearia",
 	"compatibility_date": "2026-03-17",
-	"pages_build_output_dir": "./dist"
+	"pages_build_output_dir": "./dist",
+	"d1_databases": [
+		{
+			"binding": "PARTHENON_DB",
+			"database_name": "parthenon-bookings",
+			"database_id": "bec93f31-dd37-4d12-89e2-22b96fa8286c"
+		}
+	]
 }
