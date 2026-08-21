@@ -1,5 +1,5 @@
 ---
-import { business, bookingServices, serviceGroups, whatsappUrl } from '../data/business';
+import { business, bookingServices, calendarBooking, serviceGroups, whatsappUrl } from '../data/business';
 
 const { email: EMAIL, instagramUrl: INSTAGRAM_URL, owner: OWNER, whatsappDisplay: WHATSAPP_TEL } = business;
 const WHATSAPP_URL = whatsappUrl;
@@ -10,6 +10,7 @@ const servicesByGroup = serviceGroups.map(group => ({
     .map(serviceId => bookingServices.find(service => service.id === serviceId))
     .filter(Boolean),
 }));
+const calendarServices = bookingServices.filter(service => service.bookingMode === 'calendar');
 
 const hours = [
   { day: 'Segunda-feira', value: '10h às 19h' },
@@ -370,9 +371,11 @@ const gallery = [
     }
 
     .service-body li {
-      display: flex;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: center;
       justify-content: space-between;
-      gap: 1rem;
+      gap: 0.65rem 1rem;
       padding: 0.8rem 0;
       border-bottom: 1px solid #d0dce8;
       font-size: 0.92rem;
@@ -398,6 +401,16 @@ const gallery = [
       text-transform: uppercase;
     }
 
+    .service-body li .service-book {
+      grid-column: 1 / -1;
+      margin-top: 0.1rem;
+    }
+
+    .service-book--whatsapp {
+      border-color: #25d366;
+      color: #147a3a;
+    }
+
     .section-booking {
       background: #0a0f17;
       color: #fff;
@@ -416,10 +429,14 @@ const gallery = [
       background: rgba(255, 255, 255, 0.04);
     }
 
+    .sr-only { position: absolute; width: 1px; height: 1px; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
     :global(.booking-step) { margin: 0 0 0.7rem; color: rgba(255, 255, 255, 0.58); font-size: 0.72rem; letter-spacing: 0.18em; text-transform: uppercase; }
+    .booking-title { margin: 0 0 0.55rem; font-family: var(--font-display); font-size: clamp(1.75rem, 8vw, 2.35rem); line-height: 1.08; }
     .booking-service { display: grid; gap: 0.35rem; margin: 1rem 0 1.25rem; padding: 0.9rem 1rem; border: 1px solid rgba(255, 255, 255, 0.18); border-left: 3px solid #c9a55c; border-radius: 8px; background: rgba(255, 255, 255, 0.05); }
+    .booking-service--compact { gap: 0.6rem; }
     .booking-service__name { font-family: var(--font-display); font-size: 1.5rem; line-height: 1.2; }
     .booking-service__price { color: rgba(255, 255, 255, 0.68); font-size: 0.9rem; }
+    .booking-service__duration { color: rgba(255, 255, 255, 0.62); font-size: 0.88rem; }
     .booking-form { display: grid; gap: 1rem; }
     .booking-field { display: grid; gap: 0.4rem; }
     .booking-field label { font-size: 0.82rem; font-weight: 700; }
@@ -427,14 +444,26 @@ const gallery = [
     .booking-actions { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 1rem; }
     .booking-button { display: inline-flex; align-items: center; justify-content: center; min-height: 50px; padding: 0.8rem 1rem; border: 1px solid #fff; border-radius: 8px; background: #fff; color: #0d1b2a; cursor: pointer; font: inherit; font-size: 0.76rem; font-weight: 700; letter-spacing: 0.12em; text-align: center; text-transform: uppercase; transition: border-color 160ms ease, background 160ms ease, color 160ms ease, transform 160ms ease; }
     .booking-button:hover { transform: translateY(-1px); }
+    .booking-button:disabled { cursor: not-allowed; opacity: 0.46; transform: none; }
     .booking-button--secondary { border-color: rgba(255, 255, 255, 0.42); background: transparent; color: #fff; }
     .booking-button--whatsapp { border-color: #25d366; background: #25d366; color: #fff; }
-    :global(.booking-service-options) { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0.75rem; margin-top: 1rem; }
-    :global(.booking-service-option) { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 0.85rem; width: 100%; min-height: 68px; padding: 0.95rem 1rem; border: 1px solid rgba(255, 255, 255, 0.22); border-radius: 8px; background: rgba(255, 255, 255, 0.04); color: #fff; cursor: pointer; font: inherit; text-align: left; transition: background 160ms ease, border-color 160ms ease, transform 160ms ease; }
+    :global(.booking-service-options) { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0.75rem; margin: 1rem 0 0; padding: 0; border: 0; }
+    :global(.booking-service-option) { position: relative; display: grid; grid-template-columns: 1.25rem minmax(0, 1fr) auto; align-items: center; gap: 0.7rem; width: 100%; min-height: 68px; padding: 0.95rem 1rem; border: 1px solid rgba(255, 255, 255, 0.22); border-radius: 8px; background: rgba(255, 255, 255, 0.04); color: #fff; cursor: pointer; font: inherit; text-align: left; transition: background 160ms ease, border-color 160ms ease, transform 160ms ease; }
+    :global(.booking-service-option input) { position: absolute; opacity: 0; pointer-events: none; }
     :global(.booking-service-option:hover) { border-color: #c9a55c; background: rgba(201, 165, 92, 0.12); transform: translateY(-1px); }
-    :global(.booking-service-option[aria-pressed="true"]) { border-color: #c9a55c; background: rgba(201, 165, 92, 0.16); box-shadow: inset 3px 0 0 #c9a55c; }
+    :global(.booking-service-option:has(input:focus-visible)) { outline: 3px solid rgba(154, 31, 61, 0.72); outline-offset: 3px; }
+    :global(.booking-service-option:has(input:checked)) { border-color: #c9a55c; background: rgba(201, 165, 92, 0.16); box-shadow: inset 3px 0 0 #c9a55c; }
+    :global(.booking-service-option__check) { display: grid; width: 1.15rem; height: 1.15rem; place-items: center; border: 1px solid rgba(255, 255, 255, 0.45); border-radius: 4px; color: #0a0f17; background: rgba(255, 255, 255, 0.05); }
+    :global(.booking-service-option__check::after) { content: ""; width: 0.35rem; height: 0.65rem; border: solid #0a0f17; border-width: 0 2px 2px 0; opacity: 0; transform: rotate(45deg); }
+    :global(.booking-service-option:has(input:checked) .booking-service-option__check) { border-color: #c9a55c; background: #c9a55c; }
+    :global(.booking-service-option:has(input:checked) .booking-service-option__check::after) { opacity: 1; }
     :global(.booking-service-option__name) { font-family: var(--font-display); font-size: 1.12rem; line-height: 1.2; }
     :global(.booking-service-option__price) { color: rgba(255, 255, 255, 0.72); font-size: 0.88rem; font-weight: 700; white-space: nowrap; }
+    .booking-selection-summary { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 0.3rem 1rem; margin-top: 1rem; padding: 0.85rem 1rem; border: 1px solid rgba(255, 255, 255, 0.16); border-radius: 8px; background: rgba(255, 255, 255, 0.04); color: rgba(255, 255, 255, 0.72); font-size: 0.92rem; }
+    .booking-selection-summary strong { color: #fff; text-align: right; }
+    .booking-selection-summary span:last-child { grid-column: 1 / -1; }
+    .booking-service-list { display: grid; gap: 0.35rem; margin: 0; padding: 0; list-style: none; }
+    .booking-service-list li { color: #fff; font-weight: 700; }
     :global(.booking-note), .booking-error { margin: 1rem 0 0; font-size: 0.9rem; }
     :global(.booking-note) { color: rgba(255, 255, 255, 0.7); }
     .booking-error { color: #ffb6c6; }
@@ -448,6 +477,7 @@ const gallery = [
     .booking-success p { margin: 0 0 1.25rem; color: rgba(255, 255, 255, 0.74); }
     .booking-summary { display: grid; gap: 0.7rem; margin: 0 auto 1.5rem; padding: 1rem; border: 1px solid rgba(255, 255, 255, 0.16); border-radius: 8px; text-align: left; }
     .booking-summary div { display: flex; justify-content: space-between; gap: 1rem; }
+    .booking-summary .booking-summary__stack { display: grid; gap: 0.4rem; }
     .booking-summary small { color: rgba(255, 255, 255, 0.56); text-transform: uppercase; letter-spacing: 0.1em; }
     .booking-summary strong { text-align: right; }
     .booking-price-reminder { margin: -0.55rem 0 1.5rem !important; color: #fff !important; font-size: 0.95rem; }
@@ -776,14 +806,22 @@ const gallery = [
               <div class="service-body">
                 <ul>
                   {group.services.map(service => (
-                    <li><span>{service.name}</span><strong>{service.price}</strong></li>
+                    <li>
+                      <span>{service.name}</span>
+                      <strong>{service.price}</strong>
+                      {service.bookingMode === 'whatsapp' && (
+                        <a
+                          class="service-book service-book--whatsapp"
+                          href={`${WHATSAPP_URL}?text=${encodeURIComponent(`Olá! Vi o serviço de ${service.name} no site da Parthenon e gostaria de conversar sobre ele antes de agendar.`)}`}
+                          target="_blank"
+                          rel="noopener"
+                        >
+                          Falar no WhatsApp
+                        </a>
+                      )}
+                    </li>
                   ))}
                 </ul>
-                {group.serviceIds.length === 1 ? (
-                  <button class="service-book" type="button" data-booking-service={group.serviceIds[0]}>Agendar horário</button>
-                ) : (
-                  <button class="service-book" type="button" data-booking-group={group.serviceIds.join(',')}>Escolher serviço</button>
-                )}
               </div>
             </article>
           ))}
@@ -800,54 +838,42 @@ const gallery = [
         </div>
         <div class="booking-panel" id="booking-panel">
           <div id="booking-selection">
-            <p class="booking-step">1. Serviço</p>
-            <p class="booking-note">Escolha um serviço para continuar.</p>
-          </div>
-          <div id="booking-details" hidden>
-            <p class="booking-step">2. Seus dados</p>
-            <div class="booking-service">
-              <span class="booking-service__name" id="booking-service-name"></span>
-              <span class="booking-service__price" id="booking-service-price"></span>
+            <p class="booking-step">1. Serviços</p>
+            <h3 class="booking-title">Escolha seus serviços</h3>
+            <p class="booking-note">Selecione tudo o que deseja fazer neste atendimento.</p>
+            <fieldset class="booking-service-options" id="booking-service-options" aria-describedby="booking-selection-summary">
+              <legend class="sr-only">Serviços para agendar</legend>
+              {calendarServices.map(service => (
+                <label class="booking-service-option" data-booking-option>
+                  <input type="checkbox" name="booking-services" value={service.id} />
+                  <span class="booking-service-option__check" aria-hidden="true"></span>
+                  <span class="booking-service-option__name">{service.name}</span>
+                  <span class="booking-service-option__price">{service.price}</span>
+                </label>
+              ))}
+            </fieldset>
+            <div class="booking-selection-summary" id="booking-selection-summary" aria-live="polite">
+              <span id="booking-selected-count">0 serviços selecionados</span>
+              <strong id="booking-selected-total">Total: R$ 0</strong>
+              <span>Tempo do atendimento: 50 minutos</span>
             </div>
-            <form class="booking-form" id="booking-form" novalidate>
-              <div class="booking-field">
-                <label for="booking-name">Nome</label>
-                <input id="booking-name" name="name" type="text" autocomplete="name" required />
-              </div>
-              <div class="booking-field">
-                <label for="booking-phone">Telefone / WhatsApp</label>
-                <input id="booking-phone" name="phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="(34) 9 9999-9999" required />
-              </div>
-              <div class="booking-actions">
-                <button class="booking-button" type="submit">Ver horários disponíveis</button>
-                <button class="booking-button booking-button--secondary" type="button" data-booking-change>Trocar serviço</button>
-              </div>
-              <p class="booking-error" id="booking-form-error" role="alert" hidden></p>
-            </form>
-          </div>
-          <div id="booking-unavailable" hidden>
-            <p class="booking-step">Atendimento personalizado</p>
-            <div class="booking-service">
-              <span class="booking-service__name" id="booking-unavailable-service"></span>
-              <span class="booking-service__price" id="booking-unavailable-price"></span>
-            </div>
-            <p class="booking-note">Este serviço precisa ser combinado diretamente com o barbeiro antes do agendamento.</p>
             <div class="booking-actions">
-              <a class="booking-button booking-button--whatsapp" id="booking-unavailable-whatsapp" target="_blank" rel="noopener">Falar no WhatsApp</a>
-              <button class="booking-button booking-button--secondary" type="button" data-booking-change>Trocar serviço</button>
+              <button class="booking-button" id="booking-continue" type="button" disabled>CONTINUAR</button>
             </div>
           </div>
           <div id="booking-calendar" hidden>
-            <p class="booking-step">3. Data e horário</p>
-            <div class="booking-service">
-              <span class="booking-service__name" id="booking-calendar-service"></span>
+            <p class="booking-step">2. Data e horário</p>
+            <div class="booking-service booking-service--compact">
+              <span class="booking-service__name">Atendimento Parthenon</span>
+              <ul class="booking-service-list" id="booking-calendar-services"></ul>
               <span class="booking-service__price" id="booking-calendar-price"></span>
+              <span class="booking-service__duration">50 minutos</span>
             </div>
             <p class="booking-loading" id="booking-calendar-loading" role="status">Carregando horários disponíveis...</p>
             <div class="cal-scheduler" id="cal-scheduler" aria-live="polite"></div>
             <p class="booking-error" id="booking-cal-error" role="alert" hidden></p>
             <div class="booking-actions">
-              <button class="booking-button booking-button--secondary" type="button" data-booking-change>Trocar serviço</button>
+              <button class="booking-button booking-button--secondary" type="button" data-booking-change>ALTERAR SERVIÇOS</button>
             </div>
           </div>
           <div class="booking-success" id="booking-success" hidden aria-live="polite">
@@ -857,11 +883,11 @@ const gallery = [
             <h3>Horário confirmado!</h3>
             <p id="booking-success-copy"></p>
             <div class="booking-summary">
-              <div><small>Serviço</small><strong id="booking-success-service"></strong></div>
+              <div class="booking-summary__stack"><small>Serviços</small><ul class="booking-service-list" id="booking-success-services"></ul></div>
               <div><small>Data</small><strong id="booking-success-date"></strong></div>
               <div><small>Horário</small><strong id="booking-success-time"></strong></div>
             </div>
-            <p class="booking-price-reminder">Valor do serviço: <strong id="booking-success-price"></strong></p>
+            <p class="booking-price-reminder">Valor total: <strong id="booking-success-price"></strong></p>
             <p>Seu horário já está confirmado. Para facilitar o contato com a barbearia, você pode enviar uma confirmação pelo WhatsApp. A mensagem já estará pronta. É só enviar.</p>
             <div class="booking-actions">
               <a class="booking-button booking-button--whatsapp" id="booking-whatsapp-confirmation" target="_blank" rel="noopener">Abrir WhatsApp</a>
@@ -971,33 +997,35 @@ const gallery = [
     </div>
   </div>
 
-  <script id="booking-config" type="application/json" set:html={JSON.stringify({ services: bookingServices, whatsappUrl: WHATSAPP_URL })}></script>
+  <script id="booking-config" type="application/json" set:html={JSON.stringify({ services: bookingServices, calendar: calendarBooking, whatsappUrl: WHATSAPP_URL })}></script>
 
   <script is:inline>
-    const bookingConfig = JSON.parse(document.getElementById('booking-config')?.textContent || '{"services":[]}');
+    const bookingConfig = JSON.parse(document.getElementById('booking-config')?.textContent || '{"services":[],"calendar":{}}');
     const bookingServicesById = new Map(bookingConfig.services.map((service) => [service.id, service]));
     const bookingPanel = document.getElementById('booking-panel');
     const bookingSelection = document.getElementById('booking-selection');
-    const bookingDetails = document.getElementById('booking-details');
-    const bookingUnavailable = document.getElementById('booking-unavailable');
     const bookingCalendar = document.getElementById('booking-calendar');
     const bookingSuccess = document.getElementById('booking-success');
-    const bookingForm = document.getElementById('booking-form');
-    const bookingName = document.getElementById('booking-name');
-    const bookingPhone = document.getElementById('booking-phone');
-    const bookingFormError = document.getElementById('booking-form-error');
     const bookingCalError = document.getElementById('booking-cal-error');
     const bookingCalendarLoading = document.getElementById('booking-calendar-loading');
     const calendarHost = document.getElementById('cal-scheduler');
-    const CAL_NAMESPACE = 'corte-simples';
-    const CAL_INLINE_ID = 'my-cal-inline-corte-simples';
-    let selectedBookingService = null;
+    const bookingContinue = document.getElementById('booking-continue');
+    const bookingSelectedCount = document.getElementById('booking-selected-count');
+    const bookingSelectedTotal = document.getElementById('booking-selected-total');
+    const bookingCalendarServices = document.getElementById('booking-calendar-services');
+    const bookingCalendarPrice = document.getElementById('booking-calendar-price');
+    const calendarConfig = bookingConfig.calendar || {};
+    const CAL_NAMESPACE = 'atendimento-parthenon';
+    const CAL_INLINE_ID = 'my-cal-inline-atendimento-parthenon';
+    let selectedBookingServiceIds = new Set();
     let calEmbedInitialized = false;
     let calEmbedLoadPromise = null;
     let calEmbedMounting = false;
 
+    const currency = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 });
+
     const setBookingView = (view) => {
-      [bookingSelection, bookingDetails, bookingUnavailable, bookingCalendar, bookingSuccess].forEach((element) => {
+      [bookingSelection, bookingCalendar, bookingSuccess].forEach((element) => {
         element.hidden = element !== view;
       });
     };
@@ -1016,28 +1044,38 @@ const gallery = [
     };
 
     const clearBookingErrors = () => {
-      bookingFormError.hidden = true;
       bookingCalError.hidden = true;
+      bookingCalError.textContent = '';
     };
 
-    const setBookingServiceText = (nameId, priceId, service) => {
-      document.getElementById(nameId).textContent = service.name;
-      document.getElementById(priceId).textContent = service.price;
+    const selectedBookingServices = () => [...selectedBookingServiceIds]
+      .map((serviceId) => bookingServicesById.get(serviceId))
+      .filter((service) => service?.bookingMode === 'calendar');
+
+    const selectedServicesLabel = () => selectedBookingServices().map((service) => service.name).join(', ');
+
+    const selectedServicesTotal = () => selectedBookingServices()
+      .reduce((total, service) => total + (Number.isFinite(service.priceValue) ? service.priceValue : 0), 0);
+
+    const selectedServicesTotalLabel = () => currency.format(selectedServicesTotal());
+
+    const renderServiceList = (target, services) => {
+      target.replaceChildren(...services.map((service) => {
+        const item = document.createElement('li');
+        item.textContent = service.name;
+        return item;
+      }));
     };
 
-    const formatBrazilPhone = (value) => {
-      let digits = value.replace(/\D/g, '');
-      if ((digits.length === 12 || digits.length === 13) && digits.startsWith('55')) digits = digits.slice(2);
-      if (digits.length <= 2) return digits ? `(${digits}` : '';
-      if (digits.length <= 6) return `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
-      if (digits.length <= 10) return `(${digits.slice(0, 2)}) ${digits.slice(2, 6)}-${digits.slice(6)}`;
-      return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7, 11)}`;
-    };
-
-    const normalizedBrazilPhone = (value) => {
-      let digits = value.replace(/\D/g, '');
-      if ((digits.length === 12 || digits.length === 13) && digits.startsWith('55')) digits = digits.slice(2);
-      return digits.length === 10 || digits.length === 11 ? `+55${digits}` : null;
+    const syncServiceSelection = () => {
+      const services = selectedBookingServices();
+      const count = services.length;
+      bookingSelectedCount.textContent = count === 1 ? '1 servi\u00e7o selecionado' : `${count} servi\u00e7os selecionados`;
+      bookingSelectedTotal.textContent = `Total: ${selectedServicesTotalLabel()}`;
+      bookingContinue.disabled = count === 0;
+      document.querySelectorAll('input[name="booking-services"]').forEach((input) => {
+        input.checked = selectedBookingServiceIds.has(input.value);
+      });
     };
 
     const dateParts = (dateString) => {
@@ -1051,84 +1089,24 @@ const gallery = [
 
     const calLinkValue = (calLink) => calLink.replace(/^https?:\/\/(?:app\.)?cal\.com\//, '').replace(/^\//, '').trim();
 
-    const selectBookingService = (serviceId) => {
-      const service = bookingServicesById.get(serviceId);
-      if (!service) return;
+    const showSelectionStep = ({ clearSelection = false, clearClientDetails = false } = {}) => {
       enterBookingMode();
-      selectedBookingService = service;
-      clearBookingErrors();
-      bookingCalendarLoading.hidden = true;
-      setBookingServiceText('booking-service-name', 'booking-service-price', service);
-      setBookingServiceText('booking-calendar-service', 'booking-calendar-price', service);
-      setBookingServiceText('booking-unavailable-service', 'booking-unavailable-price', service);
-      document.getElementById('booking-unavailable-whatsapp').href = `${bookingConfig.whatsappUrl}?text=${encodeURIComponent(`Olá! Vi o serviço de ${service.name} no site da Parthenon e gostaria de conversar sobre ele antes de agendar.`)}`;
-      if (service.bookingMode === 'whatsapp') {
-        setBookingView(bookingUnavailable);
-      } else {
-        setBookingView(bookingDetails);
-        bookingName.focus();
-      }
-      scrollToBooking();
-    };
-
-    const showServiceChoices = (serviceIds) => {
-      enterBookingMode();
-      bookingSelection.replaceChildren();
-      const step = document.createElement('p');
-      step.className = 'booking-step';
-      step.textContent = '1. Serviço';
-      bookingSelection.append(step);
-      const prompt = document.createElement('p');
-      prompt.className = 'booking-note';
-      prompt.textContent = 'Escolha o serviço que deseja agendar.';
-      bookingSelection.append(prompt);
-      const choices = document.createElement('div');
-      choices.className = 'booking-service-options';
-      serviceIds.forEach((serviceId) => {
-        const service = bookingServicesById.get(serviceId);
-        if (!service) return;
-        const button = document.createElement('button');
-        button.type = 'button';
-        button.className = 'booking-service-option';
-        button.setAttribute('aria-label', `${service.name}, ${service.price}`);
-        button.setAttribute('aria-pressed', String(service.id === selectedBookingService?.id));
-        const name = document.createElement('span');
-        name.className = 'booking-service-option__name';
-        name.textContent = service.name;
-        const price = document.createElement('span');
-        price.className = 'booking-service-option__price';
-        price.textContent = service.price;
-        button.append(name, price);
-        button.addEventListener('click', () => {
-          choices.querySelectorAll('.booking-service-option').forEach((option) => option.setAttribute('aria-pressed', 'false'));
-          button.setAttribute('aria-pressed', 'true');
-          selectBookingService(service.id);
-        });
-        choices.append(button);
-      });
-      bookingSelection.append(choices);
-      setBookingView(bookingSelection);
-      scrollToBooking();
-    };
-
-    const showInitialBookingSelection = (clearClientDetails = false) => {
-      selectedBookingService = null;
-      calendarHost.replaceChildren();
-      calEmbedMounting = false;
-      bookingCalendarLoading.hidden = true;
+      if (clearSelection) selectedBookingServiceIds = new Set();
       if (clearClientDetails) {
-        bookingName.value = '';
-        bookingPhone.value = '';
         document.getElementById('booking-success-copy').textContent = '';
-        document.getElementById('booking-success-service').textContent = '';
+        document.getElementById('booking-success-services').replaceChildren();
         document.getElementById('booking-success-date').textContent = '';
         document.getElementById('booking-success-time').textContent = '';
         document.getElementById('booking-success-price').textContent = '';
         document.getElementById('booking-whatsapp-confirmation').removeAttribute('href');
       }
-      bookingSelection.innerHTML = '<p class="booking-step">1. Serviço</p><p class="booking-note">Escolha um serviço para continuar.</p>';
-      setBookingView(bookingSelection);
+      calendarHost.replaceChildren();
+      calEmbedMounting = false;
+      bookingCalendarLoading.hidden = true;
       clearBookingErrors();
+      syncServiceSelection();
+      setBookingView(bookingSelection);
+      scrollToBooking();
     };
 
     const loadCalEmbed = () => {
@@ -1160,121 +1138,92 @@ const gallery = [
         const script = document.createElement('script');
         script.src = 'https://app.cal.com/embed/embed.js';
         script.async = true;
-        script.onload = () => window.Cal ? resolve(window.Cal) : reject(new Error('Cal.com indisponível.'));
-        script.onerror = () => reject(new Error('Não foi possível carregar o calendário.'));
+        script.onload = () => window.Cal ? resolve(window.Cal) : reject(new Error('Cal.com indispon\u00edvel.'));
+        script.onerror = () => reject(new Error('N\u00e3o foi poss\u00edvel carregar o calend\u00e1rio.'));
         document.head.append(script);
       });
       calEmbedLoadPromise.catch(() => { calEmbedLoadPromise = null; });
       return calEmbedLoadPromise;
     };
 
+    const bookingGuestName = (booking) => {
+      const responses = booking.responses || booking.booking?.responses || {};
+      const attendees = booking.attendees || booking.booking?.attendees || [];
+      return booking.name || booking.attendee?.name || attendees[0]?.name || responses.name?.value || responses.name || 'Cliente';
+    };
+
     const showBookingSuccess = (booking) => {
-      const selectedService = selectedBookingService;
-      if (!selectedService) return;
-      const parts = dateParts(booking.startTime);
-      const name = bookingName.value.trim();
+      const services = selectedBookingServices();
+      if (!services.length) return;
+      const parts = dateParts(booking.startTime || booking.booking?.startTime);
+      const name = bookingGuestName(booking);
       const formattedDate = parts?.date || 'Data confirmada no Cal.com';
-      const formattedTime = parts?.time || 'Horário confirmado no Cal.com';
-      document.getElementById('booking-success-copy').textContent = `${name}, seu horário está confirmado.`;
-      document.getElementById('booking-success-service').textContent = selectedService.name;
+      const formattedTime = parts?.time || 'Hor\u00e1rio confirmado no Cal.com';
+      const total = selectedServicesTotalLabel();
+      document.getElementById('booking-success-copy').textContent = `${name}, seu hor\u00e1rio est\u00e1 confirmado.`;
+      renderServiceList(document.getElementById('booking-success-services'), services);
       document.getElementById('booking-success-date').textContent = formattedDate;
       document.getElementById('booking-success-time').textContent = formattedTime;
-      document.getElementById('booking-success-price').textContent = selectedService.price;
+      document.getElementById('booking-success-price').textContent = total;
+      const serviceLines = services.map((service) => `* ${service.name}`);
       const message = [
-        'Olá! Acabei de fazer um agendamento pelo site da Parthenon.',
+        'Ol\u00e1! Acabei de fazer um agendamento pelo site da Parthenon.',
         '',
         `Nome: ${name}`,
-        `Serviço: ${selectedService.name}`,
-        `Data: ${formattedDate}`,
-        `Horário: ${formattedTime}`,
-        `Valor informado no site: ${selectedService.price}`,
         '',
-        'Meu horário já foi confirmado pelo site.',
-      ].filter(Boolean).join('\n');
+        'Servi\u00e7os:',
+        '',
+        ...serviceLines,
+        '',
+        `Data: ${formattedDate}`,
+        `Hor\u00e1rio: ${formattedTime}`,
+        `Valor informado no site: ${total}`,
+        '',
+        'Meu hor\u00e1rio j\u00e1 foi confirmado pelo site.',
+      ].join('\n');
       document.getElementById('booking-whatsapp-confirmation').href = `${bookingConfig.whatsappUrl}?text=${encodeURIComponent(message)}`;
       calendarHost.replaceChildren();
       setBookingView(bookingSuccess);
       scrollToBooking();
     };
 
-    document.querySelectorAll('[data-booking-service]').forEach((button) => {
-      button.addEventListener('click', () => selectBookingService(button.dataset.bookingService));
-    });
-
-    document.querySelectorAll('[data-booking-group]').forEach((button) => {
-      button.addEventListener('click', () => showServiceChoices(button.dataset.bookingGroup.split(',')));
-    });
-
-    document.querySelectorAll('a[href="#agendar"]').forEach((link) => {
-      link.addEventListener('click', (event) => {
-        event.preventDefault();
-        enterBookingMode();
-        window.history.replaceState(null, '', '#agendar');
-        scrollToBooking();
-      });
-    });
-
-    document.querySelectorAll('[data-booking-change]').forEach((button) => {
-      button.addEventListener('click', () => showInitialBookingSelection(true));
-    });
-
-    document.getElementById('booking-back-home')?.addEventListener('click', () => {
-      exitBookingMode();
-      showInitialBookingSelection(true);
-    });
-
-    window.addEventListener('hashchange', () => {
-      if (!window.location.hash || window.location.hash === '#inicio') exitBookingMode();
-      if (window.location.hash === '#agendar') enterBookingMode();
-    });
-
-    if (window.location.hash === '#agendar') enterBookingMode();
-
-    bookingPhone.addEventListener('input', () => {
-      bookingPhone.value = formatBrazilPhone(bookingPhone.value);
-    });
-
-    bookingForm.addEventListener('submit', async (event) => {
-      event.preventDefault();
+    const showCalendarStep = async () => {
+      const services = selectedBookingServices();
+      if (!services.length || calEmbedMounting) return;
       clearBookingErrors();
-      const name = bookingName.value.trim();
-      const phone = normalizedBrazilPhone(bookingPhone.value);
-      if (!selectedBookingService || selectedBookingService.bookingMode !== 'calendar' || !selectedBookingService.calLink) return;
-      if (calEmbedMounting) return;
-      if (name.length < 2) {
-        bookingFormError.textContent = 'Informe seu nome para continuar.';
-        bookingFormError.hidden = false;
-        bookingName.focus();
-        return;
-      }
-      if (!phone) {
-        bookingFormError.textContent = 'Informe um telefone com DDD para continuar.';
-        bookingFormError.hidden = false;
-        bookingPhone.focus();
-        return;
-      }
+      renderServiceList(bookingCalendarServices, services);
+      bookingCalendarPrice.textContent = `Valor total: ${selectedServicesTotalLabel()}`;
       setBookingView(bookingCalendar);
       bookingCalendarLoading.hidden = false;
       calEmbedMounting = true;
       scrollToBooking();
+
+      if (!calendarConfig.genericCalLink) {
+        calEmbedMounting = false;
+        bookingCalendarLoading.hidden = true;
+        bookingCalError.textContent = 'O calend\u00e1rio Atendimento Parthenon ainda precisa ser configurado. Fale com Marco pelo WhatsApp para agendar agora.';
+        bookingCalError.hidden = false;
+        return;
+      }
+
       try {
         const Cal = await loadCalEmbed();
         if (!calEmbedInitialized) {
           Cal('init', CAL_NAMESPACE, { origin: 'https://app.cal.com' });
           Cal.config = Cal.config || {};
           Cal.config.forwardQueryParams = true;
-          const CalCorteSimples = Cal.ns?.[CAL_NAMESPACE];
-          if (!CalCorteSimples) throw new Error('O calendário não foi inicializado corretamente.');
-          CalCorteSimples('on', { action: 'bookingSuccessfulV2', callback: (event) => showBookingSuccess(event.detail?.data || {}) });
-          CalCorteSimples('on', { action: 'linkReady', callback: () => {
+          const CalAtendimentoParthenon = Cal.ns?.[CAL_NAMESPACE];
+          if (!CalAtendimentoParthenon) throw new Error('O calend\u00e1rio n\u00e3o foi inicializado corretamente.');
+          CalAtendimentoParthenon('on', { action: 'bookingSuccessfulV2', callback: (event) => showBookingSuccess(event.detail?.data || {}) });
+          CalAtendimentoParthenon('on', { action: 'linkReady', callback: () => {
             calEmbedMounting = false;
             bookingCalendarLoading.hidden = true;
           }});
-          CalCorteSimples('on', { action: 'linkFailed', callback: (event) => {
+          CalAtendimentoParthenon('on', { action: 'linkFailed', callback: (event) => {
             calEmbedMounting = false;
             console.warn('Falha ao carregar o embed do Cal.com.', event.detail?.data);
             bookingCalendarLoading.hidden = true;
-            bookingCalError.textContent = 'Não foi possível abrir o calendário agora. Tente novamente ou fale com Marco pelo WhatsApp.';
+            bookingCalError.textContent = 'N\u00e3o foi poss\u00edvel abrir o calend\u00e1rio agora. Tente novamente ou fale com Marco pelo WhatsApp.';
             bookingCalError.hidden = false;
           }});
           calEmbedInitialized = true;
@@ -1284,27 +1233,72 @@ const gallery = [
         inlineContainer.id = CAL_INLINE_ID;
         inlineContainer.className = 'cal-scheduler__inline';
         calendarHost.append(inlineContainer);
-        const CalCorteSimples = Cal.ns?.[CAL_NAMESPACE];
-        if (!CalCorteSimples) throw new Error('O calendário não foi inicializado corretamente.');
-        CalCorteSimples('inline', {
+        const CalAtendimentoParthenon = Cal.ns?.[CAL_NAMESPACE];
+        if (!CalAtendimentoParthenon) throw new Error('O calend\u00e1rio n\u00e3o foi inicializado corretamente.');
+        const config = {
+          layout: 'month_view',
+          useSlotsViewOnSmallScreen: 'true',
+          theme: 'auto',
+        };
+        if (calendarConfig.selectedServicesQuestionId) {
+          config[calendarConfig.selectedServicesQuestionId] = selectedServicesLabel();
+        }
+        CalAtendimentoParthenon('inline', {
           elementOrSelector: `#${CAL_INLINE_ID}`,
-          calLink: calLinkValue(selectedBookingService.calLink),
-          config: {
-            layout: 'month_view',
-            useSlotsViewOnSmallScreen: 'true',
-            theme: 'auto',
-            name,
-            attendeePhoneNumber: phone,
-          },
+          calLink: calLinkValue(calendarConfig.genericCalLink),
+          config,
         });
-        CalCorteSimples('ui', { hideEventTypeDetails: false, layout: 'month_view' });
+        CalAtendimentoParthenon('ui', { hideEventTypeDetails: false, layout: 'month_view' });
       } catch (error) {
         calEmbedMounting = false;
         bookingCalendarLoading.hidden = true;
-        bookingCalError.textContent = 'Não foi possível abrir o calendário agora. Tente novamente ou fale com Marco pelo WhatsApp.';
+        bookingCalError.textContent = 'N\u00e3o foi poss\u00edvel abrir o calend\u00e1rio agora. Tente novamente ou fale com Marco pelo WhatsApp.';
         bookingCalError.hidden = false;
       }
+    };
+
+    document.querySelectorAll('input[name="booking-services"]').forEach((input) => {
+      input.addEventListener('change', () => {
+        const service = bookingServicesById.get(input.value);
+        if (!service || service.bookingMode !== 'calendar') {
+          input.checked = false;
+          return;
+        }
+        if (input.checked) selectedBookingServiceIds.add(input.value);
+        else selectedBookingServiceIds.delete(input.value);
+        syncServiceSelection();
+      });
     });
+
+    bookingContinue.addEventListener('click', showCalendarStep);
+
+    document.querySelectorAll('a[href="#agendar"]').forEach((link) => {
+      link.addEventListener('click', (event) => {
+        event.preventDefault();
+        enterBookingMode();
+        window.history.replaceState(null, '', '#agendar');
+        syncServiceSelection();
+        setBookingView(bookingSelection);
+        scrollToBooking();
+      });
+    });
+
+    document.querySelectorAll('[data-booking-change]').forEach((button) => {
+      button.addEventListener('click', () => showSelectionStep());
+    });
+
+    document.getElementById('booking-back-home')?.addEventListener('click', () => {
+      exitBookingMode();
+      showSelectionStep({ clearSelection: true, clearClientDetails: true });
+    });
+
+    window.addEventListener('hashchange', () => {
+      if (!window.location.hash || window.location.hash === '#inicio') exitBookingMode();
+      if (window.location.hash === '#agendar') enterBookingMode();
+    });
+
+    syncServiceSelection();
+    if (window.location.hash === '#agendar') enterBookingMode();
 
     const lightbox = document.getElementById('gallery-lightbox');
     const lightboxImage = document.getElementById('lightbox-image');
