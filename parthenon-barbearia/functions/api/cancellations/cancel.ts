@@ -30,7 +30,7 @@ export const onRequestPost = async ({ request, env }: PagesContext): Promise<Res
     await db.prepare("UPDATE booking_cancellations SET status = 'cancelled', short_code = NULL, cancelled_at = ? WHERE booking_uid = ? AND status = 'active'").bind(now.toISOString(), record.booking_uid).run();
     let services: ServiceSummary[] = [];
     try { services = JSON.parse(record.services_json) as ServiceSummary[]; } catch { /* client only needs a successful state */ }
-    const booking: CancellationBooking = { services, totalPriceCents: record.total_price_cents, appointmentStart: live.start || record.appointment_start, appointmentEnd: live.end || record.appointment_end };
+    const booking: CancellationBooking = { customerName: live.name, services, totalPriceCents: record.total_price_cents, appointmentStart: live.start || record.appointment_start, appointmentEnd: live.end || record.appointment_end };
     return json({ ok: true, booking });
   } catch (error) {
     if (error instanceof CalError && error.kind === 'already_cancelled') {

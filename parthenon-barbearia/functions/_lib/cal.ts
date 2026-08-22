@@ -1,4 +1,4 @@
-export type LiveBooking = { status: string; start: string | null; end: string | null; phone: string | null };
+export type LiveBooking = { status: string; start: string | null; end: string | null; phone: string | null; name: string | null };
 
 export class CalError extends Error {
   constructor(public kind: 'not_found' | 'already_cancelled' | 'unavailable', message: string) { super(message); }
@@ -30,7 +30,7 @@ const bookingFromResponse = (data: unknown): LiveBooking => {
   const attendee = Array.isArray(booking.attendees) ? booking.attendees[0] : undefined;
   const responses = booking.bookingFieldsResponses && typeof booking.bookingFieldsResponses === 'object' ? booking.bookingFieldsResponses : {};
   const fieldPhone = responseValue(responses.attendeePhoneNumber) || responseValue(responses.phone);
-  return { status: String(booking.status || ''), start: booking.start || booking.startTime || null, end: booking.end || booking.endTime || null, phone: attendee?.phoneNumber || booking.attendee?.phoneNumber || fieldPhone };
+  return { status: String(booking.status || ''), start: booking.start || booking.startTime || null, end: booking.end || booking.endTime || null, phone: attendee?.phoneNumber || booking.attendee?.phoneNumber || fieldPhone, name: responseValue(attendee?.name) || responseValue(booking.attendee?.name) };
 };
 
 export const getCalBooking = async (bookingUid: string, apiKey?: string): Promise<LiveBooking> => {

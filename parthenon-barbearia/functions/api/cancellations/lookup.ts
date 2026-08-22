@@ -40,7 +40,7 @@ export const onRequestPost = async ({ request, env }: PagesContext): Promise<Res
     }
     let services: ServiceSummary[] = [];
     try { services = JSON.parse(record.services_json) as ServiceSummary[]; } catch { return apiError('INTERNAL_ERROR', 500); }
-    const booking: CancellationBooking = { services, totalPriceCents: record.total_price_cents, appointmentStart, appointmentEnd: live.end || record.appointment_end };
+    const booking: CancellationBooking = { customerName: live.name, services, totalPriceCents: record.total_price_cents, appointmentStart, appointmentEnd: live.end || record.appointment_end };
     return json({ ok: true, booking });
   } catch (error) {
     if (error instanceof CalError && error.kind === 'not_found') return genericFailure();

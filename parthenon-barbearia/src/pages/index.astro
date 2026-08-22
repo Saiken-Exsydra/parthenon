@@ -485,6 +485,7 @@ const gallery = [
     .cancellation-entry { text-align: center; }
     .cancellation-entry p { margin: 0 0 1.1rem; color: rgba(255, 255, 255, 0.72); }
     .cancellation-form { display: grid; gap: 1rem; }
+    .cancellation-field-helper { margin: -0.1rem 0 0; color: rgba(255, 255, 255, 0.62); font-size: 0.82rem; line-height: 1.45; }
     .cancellation-code-input { font-size: 1.5rem !important; font-weight: 700; letter-spacing: 0.16em; text-align: center; }
     .cancellation-review { display: grid; gap: 1rem; }
     .cancellation-review__question { font-size: 1rem; font-weight: 700; }
@@ -919,11 +920,11 @@ const gallery = [
           </div>
           <div class="cancellation-entry" id="cancellation-entry" hidden aria-live="polite">
             <p class="booking-step">Cancelar agendamento</p>
-            <h3 class="booking-title">Cancelar agendamento</h3>
-            <p>Informe o código do agendamento e o telefone usado na reserva.</p>
+            <h3 class="booking-title">Vamos encontrar seu agendamento</h3>
+            <p>Digite o código de 4 dígitos que você recebeu depois de fazer o agendamento e o mesmo número de telefone que você usou na reserva.</p>
             <form class="cancellation-form" id="cancellation-form">
-              <div class="booking-field"><label for="cancellation-code">Código do agendamento</label><input class="cancellation-code-input" id="cancellation-code" name="code" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="4" pattern="[0-9]{4}" placeholder="0000" required /></div>
-              <div class="booking-field"><label for="cancellation-phone">Telefone</label><input id="cancellation-phone" name="phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="(34) 99999-9999" required /></div>
+              <div class="booking-field"><label for="cancellation-code">Código do agendamento</label><small class="cancellation-field-helper" id="cancellation-code-help">É o código de 4 dígitos mostrado após a confirmação do seu horário e enviado na mensagem preparada para o WhatsApp.</small><input class="cancellation-code-input" id="cancellation-code" name="code" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="4" pattern="[0-9]{4}" placeholder="0000" aria-describedby="cancellation-code-help" required /></div>
+              <div class="booking-field"><label for="cancellation-phone">Telefone usado no agendamento</label><small class="cancellation-field-helper" id="cancellation-phone-help">Digite o mesmo número de telefone que você informou quando marcou o horário.</small><input id="cancellation-phone" name="phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="(34) 99999-9999" aria-describedby="cancellation-phone-help" required /></div>
               <p class="booking-error" id="cancellation-error" role="alert" hidden></p>
               <div class="booking-actions"><button class="booking-button" type="submit">CONTINUAR</button><a class="booking-button booking-button--secondary" href="#inicio" data-cancellation-home>VOLTAR AO INÍCIO</a></div>
             </form>
@@ -931,7 +932,7 @@ const gallery = [
           <div class="cancellation-review" id="cancellation-review" hidden aria-live="polite">
             <p class="booking-step">Cancelar agendamento</p>
             <h3 class="booking-title">Encontramos seu agendamento</h3>
-            <div class="booking-summary"><div class="booking-summary__stack"><small>Serviços</small><ul class="booking-service-list" id="cancellation-services"></ul></div><div><small>Data</small><strong id="cancellation-date"></strong></div><div><small>Horário</small><strong id="cancellation-time"></strong></div><div><small>Valor total</small><strong id="cancellation-price"></strong></div></div>
+            <div class="booking-summary"><div id="cancellation-name-row" hidden><small>Nome</small><strong id="cancellation-name"></strong></div><div class="booking-summary__stack"><small>Serviços</small><ul class="booking-service-list" id="cancellation-services"></ul></div><div><small>Data</small><strong id="cancellation-date"></strong></div><div><small>Horário</small><strong id="cancellation-time"></strong></div><div><small>Valor total</small><strong id="cancellation-price"></strong></div></div>
             <p class="cancellation-review__question">Tem certeza de que deseja cancelar este agendamento?</p>
             <p class="booking-error" id="cancellation-review-error" role="alert" hidden></p>
             <div class="booking-actions"><button class="booking-button booking-button--secondary" id="cancellation-keep" type="button">MANTER AGENDAMENTO</button><button class="booking-button booking-button--danger" id="cancellation-confirm" type="button">SIM, CANCELAR AGENDAMENTO</button></div>
@@ -1113,6 +1114,8 @@ const gallery = [
       });
       document.getElementById('cancellation-services').replaceChildren();
       ['cancellation-date', 'cancellation-time', 'cancellation-price'].forEach((id) => { document.getElementById(id).textContent = ''; });
+      document.getElementById('cancellation-name').textContent = '';
+      document.getElementById('cancellation-name-row').hidden = true;
     };
 
     const showCancellationEntry = () => {
@@ -1444,6 +1447,9 @@ const gallery = [
         if (!response.ok || !payload.ok) { setCancellationError(error, payload.code); return; }
         cancellationCredentials = { code, phone };
         const booking = payload.booking;
+        const customerName = typeof booking.customerName === 'string' ? booking.customerName.trim() : '';
+        document.getElementById('cancellation-name').textContent = customerName;
+        document.getElementById('cancellation-name-row').hidden = !customerName;
         renderServiceList(document.getElementById('cancellation-services'), booking.services || []);
         const parts = dateParts(booking.appointmentStart);
         document.getElementById('cancellation-date').textContent = parts?.date || 'Data confirmada no Cal.com';

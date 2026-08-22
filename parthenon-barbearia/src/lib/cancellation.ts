@@ -5,6 +5,7 @@ export const CANCELLATION_RATE_WINDOW_MS = 15 * 60 * 1000;
 export type ServiceSummary = { id: string; name: string; priceCents: number };
 
 export type CancellationBooking = {
+  customerName: string | null;
   services: ServiceSummary[];
   totalPriceCents: number;
   appointmentStart: string;
